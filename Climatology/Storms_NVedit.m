@@ -24,24 +24,33 @@ breaks = find(diff(wndspd10) ~= 1);  %find where the wind speeds >10 m/s indices
 beg = []; % Vector to contain beginning of storms
 fin = []; % Vector to contain all the end locations of storms
 
-for i = 1:length(breaks)
-    
-    if ismember(breaks(i) + 1, breaks) || ismember(breaks(i) - 1, breaks)  % If a sequential value exists before or after the current indice, this means that it is a single event
-       
-        beg(end+1) = breaks(i);                                            % Add the single event as beginning
-        fin(end+1) = breaks(i);                                            % Add the single event as end
-    
-    else                                                                   % Otherwise, if there is a gap larger than 1, signifying a break in the hourly indices
-        
-        beg(end+1) = breaks(i-1) + 1;                                      % Grab the Start of the event, which is one value greater than the last end point
-        fin(end+1) = breaks(i);                                            % Grab the end of the event which is the current indice
+% Find all the starting and stopping indices of events
+for i = 1:length(breaks)    
+    if i == 1        
+        if ismember(breaks(i) + 1, breaks)    % this is the first value, if the sequential value exists in the second spot, signifying that the event is single            
+            beg(end+1) = breaks(i); % Same event so beg and fin are the same
+            fin(end+1) = breaks(i);            
+        else % Otherwise if the sequential value doesn't exist, such that from 1 - breaks(2) is a event, grab that window        
+            beg(end+1) = breaks(i);
+            fin(end+1) = breaks(i+1);
+        end  
+    elseif i > 1 % For all other values after the first indice
+        if ismember(breaks(i) + 1, breaks) % if the value 1 larger than the current index exists, we know that the current index is a stopping point, because the next value is a single event
+            beg(end+1) = breaks(i-1) + 1; % Grab the starting index which is one after the last stopping point
+            fin(end+1) = breaks(i); % end on stopping point which is current index
+        elseif ismember(breaks(i) - 1, breaks) % if the value 1 less than the current index exists, we know that the current value is a single event 
+            beg(end+1) = breaks(i); % these will be the same
+            fin(end+1) = breaks(i);
+        else %otherwise, if there is no sequential value surrounding the current index
+            beg(end+1) = breaks(i-1) + 1; %grab 1 value after the last stopping point
+            fin(end+1) = breaks(i); % Current Index is stopping point
+        end
     end
 end
 
 % Change to vertical orientation
 beg = beg';
 fin = fin';
-
+        
 % Combine the two vectors into a single variable
-events = [beg, fin];
-clear beg fin
+events = [beg, fin];    
