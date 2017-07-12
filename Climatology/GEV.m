@@ -4,6 +4,7 @@ clearvars
 
 %first load in the data
 dir_nm = '/Users/andrewmcauliffe/Desktop/hourly_data/';
+station_name = 'Whidbey NAS';
 station_nm = 'Whidbey_NAS';
 file_nm = 'whidbey_hourly'; % you will have to change this variable for each station
 load_file = strcat(dir_nm,file_nm);
@@ -53,7 +54,7 @@ hold on
 bar(histgrid,myhist,'FaceColor',[.8 .8 1])
 line(xgrid,pdf);
 
-% Adjust plot parameters such as axes
+% Plot Parameters
 ax = gca;  % Play with the Axes 
 ax.XLim = [10 28];
 
@@ -106,3 +107,24 @@ close(hFig)
 RI = 1./cdf;
 plot(xgrid, RI)
 ylim([0 100])
+plot_tit = sprintf('Recurrence Interval - %s', station_nm);
+title(plot_tit)
+xlabel('Wind Speed[m/s]')
+ylabel('Time [years]')
+
+
+ax = gca;
+set(gca,'XMinorTick','on')  %add minor tick marks on x-axis
+
+box on 
+grid on
+
+
+%% Save the Plot
+outname = sprintf('RI_%s',station_nm);
+hFig = gcf;
+hFig.PaperUnits = 'inches';
+hFig.PaperSize = [8.5 11];
+hFig.PaperPosition = [0 0 7 7];
+print(hFig,'-dpng','-r350',outname) %saves the figure, (figure, filetype, resolution, file name)
+close(hFig)
