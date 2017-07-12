@@ -25,23 +25,16 @@ beg = []; % Vector to contain beginning of storms
 fin = []; % Vector to contain all the end locations of storms
 
 for i = 1:length(breaks)
-    
     if ismember(breaks(i) + 1, breaks) || ismember(breaks(i) - 1, breaks)  % If a sequential value exists before or after the current indice, this means that it is a single event
-       
-        beg(end+1) = breaks(i);                                            % Add the single event as beginning
-        fin(end+1) = breaks(i);                                            % Add the single event as end
-    
-    else                                                                   % Otherwise, if there is a gap larger than 1, signifying a break in the hourly indices
-        
-        beg(end+1) = breaks(i-1) + 1;                                      % Grab the Start of the event, which is one value greater than the last end point
-        fin(end+1) = breaks(i);                                            % Grab the end of the event which is the current indice
+        beg(end+1) = breaks(i);                                            % Add the 
+        fin(end+1) = breaks(i);
+    else
+        beg(end+1) = breaks(i-1);
+        fin(end+1) = breaks(i);
     end
 end
 
-% Change to vertical orientation
 beg = beg';
 fin = fin';
-
-% Combine the two vectors into a single variable
 events = [beg, fin];
 clear beg fin
