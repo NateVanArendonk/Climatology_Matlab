@@ -7,7 +7,7 @@
 %THIS SCRIPT RUNS convert_hourly script and ScalewindPowerLaw
 clearvars
 % load the data
-load('/Users/andrewmcauliffe/Desktop/Downloaded Raw Data/victoria_bc.mat');
+load('/Users/andrewmcauliffe/Desktop/Downloaded Raw Data/whidbey_nas.mat');
 %% Housekeeping stuff - This is done in structure combine as well
 % Convert cells to double 
 %station_data.wndmaxspd = str2double(station_data.wndmaxspd(:,1));
@@ -16,8 +16,8 @@ load('/Users/andrewmcauliffe/Desktop/Downloaded Raw Data/victoria_bc.mat');
 
 %% Variables that change every time
 
-elevation = 70;
-station_name = 'victoria_bc';
+elevation = 14.3;
+station_name = 'whidbey';
 scaled_height = 10; 
 surface_type = 'land';
 
