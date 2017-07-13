@@ -102,5 +102,6 @@ clear ans elevation I nan_inds scaled_height station_data surface_type
 
 %% Save Data
 outname = sprintf('%s_hourly',station_name);
-
+cd('../../hourly_data')
 save(outname,'-struct','B');
+cd('../matlab/Matlab_Structure')
