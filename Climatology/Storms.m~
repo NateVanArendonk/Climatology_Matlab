@@ -59,6 +59,8 @@ fin = fin';
 beg = wndspd10(beg);
 fin = wndspd10(fin);
 
+clear breaks i 
+
 %-------------Recap------------------
 % I have generated 2 lists of events corresponding to times when winds are
 % greater than 10m/s and grabbed the starting and stopping points of each
@@ -97,15 +99,5 @@ beg_del = [];                                                              % Emp
 fin_del = [];                                                              % Empty vector to house values to be deleted
 
 for i = 1:length(events)                                                   % For every value in events
-    if abs(beg(i) - fin(i)) < 3                                            % If the difference between beginning and end is less than 3
-        beg_del(end+1) = i;                                                % Grab indice to delete
-        fin_del(end+1) = i;                                                % Grab indice to delete
-    end
-end
-
-beg(beg_del) = [];                                                         % Delete the cells that need to be deleted
-fin(fin_del) = [];                                                         % Delete the cells that need to be deleted
-
-events = [beg,fin];                                                        % Generate a 2 column matrix of beginning and ends of storm events
-
-clear breaks i beg beg_del fin fin_del i 
+    if abs(beg(i) - fin(i)) < 3                                            %
+        
