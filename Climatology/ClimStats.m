@@ -1,11 +1,12 @@
 %% Script to calculate statistics of data 
-file_nm = 'whidbey_hourly.mat'; % change this to the location of interest
-file_loc = '/Users/andrewmcauliffe/Desktop/hourly_data/';
-file_load = strcat(file_loc, file_nm);
+file_nm = 'hourly_data/whidbey_hourly.mat'; % change this to the location of interest
+dir_nm = '../../';
+%dir_nm = '/Users/andrewmcauliffe/Desktop/hourly_data/';
+file_load = strcat(dir_nm, file_nm);
 
 %load in the data
 load(file_load)
-clear stn_nm file_loc file_load file_nm
+clear stn_nm dir_nm file_load file_nm
 
 
 %% Get rid of NaN's
@@ -30,9 +31,31 @@ spd_mode = mode(wndspd);
 dir_mode = mode(wnddir);
 slp_mode = mode(slp);
 
-% NEED to add this to the code to print to the command window
-% 
-% fprintf('Obs Max Wind Speed %4.2f m/s \n',(max(O.wndspd)))
-% fprintf('NNRP Max Wind Speed %4.2f m/s \n',(max(N.wndspd_10m)))
-% fprintf('HRDPS Max Wind Speed %4.2f m/s \n',(max(H.wndspd_10m(:,3))))
+%Calculate Speed Max and Min
+spd_max = max(wndspd);
+spd_min = min(wndspd);
+
+%% Print Values to the screen
+
+fprintf('\n')
+fprintf('Wind Speed Mean: %4.2f m/s \n',(spd_mean))
+fprintf('Wind Direction Mean: %4.2f degrees \n',(dir_mean))
+fprintf('Sea Level Pressure Mean: %4.2f mb \n',(slp_mean))
+fprintf('\n') % prints empty line to space out output
+
+fprintf('Wind Speed Variance: %4.2f m/s \n',(spd_var))
+fprintf('Wind Direction Variance: %4.2f degrees \n',(dir_var))
+fprintf('Sea Level Pressure Variance: %4.2f mb \n',(slp_var))
+fprintf('\n')
+
+fprintf('Wind Speed Mode: %4.2f m/s \n',(spd_mode))
+fprintf('Wind Direction Mode: %4.2f degrees \n',(dir_mode))
+fprintf('Sea Level Pressure Mode: %4.2f mb \n',(slp_mode))
+fprintf('\n')
+
+fprintf('Wind Speed Mean: %4.2f m/s \n',(spd_max))
+fprintf('Wind Speed Mean: %4.2f m/s \n',(spd_min))
+
+
+
 

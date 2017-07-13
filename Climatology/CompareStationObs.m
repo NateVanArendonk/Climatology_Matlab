@@ -5,7 +5,7 @@ clearvars
 stationName = 'Whidbey_NAS';
 
 % Load Station Data
-dir_nm = '/Users/andrewmcauliffe/Desktop/hourly_data/';
+dir_nm = '../../hourly_data/';
 file_nm = 'whidbey_hourly'; % you will have to change this variable for each station
 load_file = strcat(dir_nm,file_nm);
 O = load(load_file); %--------O means observation data
@@ -47,32 +47,44 @@ options.vWinds = [0 5 10 15 20 25];
 options.AngleNorth = 0;
 options.AngleEast = 90;
 options.labels = {'North (360°)','South (180°)','East (90°)','West (270°)'};
-options.TitleString = [' '];
+options.scalefactor = 1;
+options.legendtype = 0; % removes legend if 0, 1 for color bar
+%options.freqlabelangle = 120;
+
+
+
 
 clf
-ax = subplot(131);
+options.TitleString = [{'Obs';' '}]; %Set Title
+ax = subplot(1,3,1);
 options.axes = ax;
 [figure_handle,count,speeds,directions,Table] = WindRose(O.wnddir,O.wndspd,options);
-title('Obs')
 
-ax = subplot(132);
+
+options.TitleString = [{'NNRP';' '}];
+ax = subplot(1,3,2);
 options.axes = ax;
 [figure_handle,count,speeds,directions,Table] = WindRose(N.wnddir,N.wndspd_10m,options);
-title('NNRP')
 
-ax = subplot(133);
+
+options.TitleString = [{'HRDPS';' '}];
+ax = subplot(1,3,3);
 options.axes = ax;
 [figure_handle,count,speeds,directions,Table] = WindRose(H.wnddir,H.wndspd_10m,options);
-title('HRDPS')
 
 
-% outname = sprintf('WindRose_Compare_%s',stationName);
-% hFig = gcf;
-% hFig.PaperUnits = 'inches';
-% hFig.PaperSize = [8.5 11];
-% hFig.PaperPosition = [0 0 7 7];
-% print(hFig,'-dpng','-r350',outname) %saves the figure, (figure, filetype, resolution, file name)
-% close(hFig)
+% Change to location of folder to save figure
+cd('../../Matlab_Figures/compare_stations/Windrose')
+
+
+
+outname = sprintf('WindRose_Compare_%s',stationName);
+hFig = gcf;
+hFig.PaperUnits = 'inches';
+hFig.PaperSize = [8.5,11];
+hFig.PaperPosition = [0 0 7 7];
+print(hFig,'-dpng','-r500',outname, '-painters') %saves the figure, (figure, filetype, resolution, file name)
+close(hFig)
 
 
 %% Print Max winds observed/predicted to the command window
@@ -122,9 +134,9 @@ paramEsts = gevfit(x);  % grab GEV values
 xgrid = 0:x_bin:30;  % create evenly spaced grid
 histgrid = x_min:hist_bin:x_max;  % create locations for bars
 pdf = gevpdf(xgrid,paramEsts(1),paramEsts(2),paramEsts(3));  % create PDF from GEV parameters
-O.cdf = 1-cumsum(pdf)*x_bin;  % Cumulative distribution function
+O.cdf = 1 - gevcdf(xgrid,paramEsts(1),paramEsts(2),paramEsts(3)); % create CDF from GEV PDF
 
-%CDF is 1 - PDF
+%CDF is 1 - PDF, concerned about probability up to specific threshold
 
 
 myhist = histc(x,histgrid);  % counts the number of values within the binned ranges of histgrid
@@ -142,7 +154,7 @@ ax.XLim = [10 28];
 
 tbox = sprintf('mu = %4.2f \nsigma = %4.2f \nk = %4.2f',paramEsts(1),paramEsts(2),paramEsts(3));
 %text(ax.XLim(1)*1.01,ax.YLim(2)*.9,tbox)
-text(21,0.3, tbox)
+text(21,max(myhist_hourly), tbox)
 
 xlabel('Max Yearly 6-hourly Wind Speed Obs[m/s]')
 ylabel('Probability')
@@ -163,8 +175,7 @@ paramEsts = gevfit(x);
 xgrid = 0:x_bin:30;
 histgrid = x_min:hist_bin:x_max;
 pdf = gevpdf(xgrid,paramEsts(1),paramEsts(2),paramEsts(3));
-N.cdf = 1-cumsum(pdf)*x_bin;
-
+N.cdf = 1 - gevcdf(xgrid,paramEsts(1),paramEsts(2),paramEsts(3)); % create CDF from GEV PDF
 
 % kMLE = paramEsts(1);        % Shape parameter
 % sigmaMLE = paramEsts(2);    % Scale parameter
@@ -179,24 +190,24 @@ line(xgrid,pdf);
  
 ax = gca; % current axes
 ax.XLim = [12 28];
+ax.YLim = [0 max(myhist) * 1.1];
 
 tbox = sprintf('mu = %4.2f \nsigma = %4.2f \nk = %4.2f',paramEsts(1),paramEsts(2),paramEsts(3));
 %text(ax.XLim(1)*1.01,ax.YLim(2)*.9,tbox)
-text(22,0.3, tbox)
+text(22,max(myhist) * 0.9, tbox)
 
 xlabel('Max Yearly 6-hourly Wind Speed Pred [m/s]')
 ylabel('Probability')
 
-% NEED TO FIX THE O.recur, it is not working
 
-% CDF and Return Invtervals    % THIS NEEDS FIXING
+% CDF and Return Invtervals   
 subplot(2,2,[2 4])
 hold on
-N.recur = 1./N.cdf; % this works, I need to fix obs
-O.recur = 1./O.cdf;
+N.recur = 1./N.cdf; % Recurrence Interval = 1/probability, prob = CDF
+O.recur = 1./O.cdf; 
 plot(xgrid,O.recur)
 plot(xgrid,N.recur)
-xlim([17 25])
+xlim([12 25])
 ylim([0 100])
 ylabel('Reoccurence Interval [years]')
 xlabel('Max 6-hour Yearly wind Speed [m/s]')
@@ -205,18 +216,15 @@ box on
 legend('Obs','Pred','Location','NorthWest')
 
 
-%printfig(gcf,sprintf('YearlyMaxima_%s',stationName),[11 8.5],'pdf')
+cd('../EVT')
+%printfig(gcf,sprintf('GEVYearlyMaxima_%s',stationName),[11 8.5],'pdf')
+outname = sprintf('GEVYearlyMaxima_%s',stationName);
+hFig = gcf;
+hFig.PaperUnits = 'inches';
+hFig.PaperSize = [8.5 11];
+hFig.PaperPosition = [0 0 7 7];
+print(hFig,'-dpng','-r500',outname) %saves the figure, (figure, filetype, resolution, file name)
+close(hFig)
 
-%% Plot compared time series
-compare_begin = find(O.time == N.time(1)); % beginning of Predicted time series
-compare_end = find(O.time == N.time(end)); % end of predicted time series
-inds = compare_begin:1:compare_end; % location of obs that correspond to predicted
-
-plot(N.time, N.wndspd_10m, '*')
-hold on
-plot(O.time(inds), O.wndspd(inds))
-datetick()
-legend('Pred','Obs','Location','NorthEast')
-ylabel('Wind Speed (m/s)')
-xlabel('Time (years)')
-
+% Return to Climatology Directory
+cd('../../../Matlab/Climatology')

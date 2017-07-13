@@ -51,8 +51,10 @@ cdf = 1 - gevcdf(xgrid,paramEsts(1),paramEsts(2),paramEsts(3)); % create CDF fro
 myhist = histc(x,histgrid);  % counts the number of values within the binned ranges of histgrid
 myhist = myhist/sum(myhist*hist_bin);
 hold on
+subplot(2,2,[1 3])
 bar(histgrid,myhist,'FaceColor',[.8 .8 1])
 line(xgrid,pdf);
+title('GEV - PDF')
 
 % Plot Parameters
 ax = gca;  % Play with the Axes 
@@ -89,13 +91,13 @@ box on
 % 
 % 
 %% Save the Plot
-outname = sprintf('GEV_%s',station_nm);
-hFig = gcf;
-hFig.PaperUnits = 'inches';
-hFig.PaperSize = [8.5 11];
-hFig.PaperPosition = [0 0 7 7];
-print(hFig,'-dpng','-r350',outname) %saves the figure, (figure, filetype, resolution, file name)
-close(hFig)
+% % outname = sprintf('GEV_%s',station_nm);
+% % hFig = gcf;
+% % hFig.PaperUnits = 'inches';
+% % hFig.PaperSize = [8.5 11];
+% % hFig.PaperPosition = [0 0 7 7];
+% % print(hFig,'-dpng','-r350',outname) %saves the figure, (figure, filetype, resolution, file name)
+% % close(hFig)
 
 
 %% Calculate Recurrence Interval
@@ -105,9 +107,10 @@ close(hFig)
 %Knowing CDF and thus the probability, I can calculate the Recurrence
 
 RI = 1./cdf;
+subplot(2,2,[2 4])
 plot(xgrid, RI)
 ylim([0 100])
-plot_tit = sprintf('Recurrence Interval - %s', station_nm);
+plot_tit = sprintf('Recurrence Interval - %s', station_name);
 title(plot_tit)
 xlabel('Wind Speed[m/s]')
 ylabel('Time [years]')
@@ -120,11 +123,15 @@ box on
 grid on
 
 
-%% Save the Plot
-outname = sprintf('RI_%s',station_nm);
+% Save the Plot
+cd('../../Matlab_Figures/GEV/')
+
+outname = sprintf('GEV_%s',station_nm);
 hFig = gcf;
 hFig.PaperUnits = 'inches';
 hFig.PaperSize = [8.5 11];
 hFig.PaperPosition = [0 0 7 7];
 print(hFig,'-dpng','-r350',outname) %saves the figure, (figure, filetype, resolution, file name)
 close(hFig)
+
+cd('../../matlab/Climatology')

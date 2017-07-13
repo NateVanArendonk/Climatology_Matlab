@@ -7,7 +7,7 @@
 
 %---------------Note----------------------
 %Run RefineByParameter first before running this code
-
+RefineByParameter
 %% Plot distributions for full data
 
 station_nm = 'Whidbey_NAS';
@@ -33,16 +33,20 @@ histogram(slp,100)
 title('Pressure - millibars')
 xlabel('Pressure (mb)')
 ylabel('Frequency')
+
+cd('../../Distributions/hists')
 %gtext('test')
+
 %Save the figure
-% outname = sprintf('FullDataDistributions_%s',station_nm);
-% hFig = gcf;
-% hFig.PaperUnits = 'inches';
-% hFig.PaperSize = [8.5 11];
-% hFig.PaperPosition = [0 0 7 7];
-% %mtit(hFig,'Test');  Use this for overall title if you want
-% print(hFig,'-dpng','-r350',outname) %saves the figure, (figure, filetype, resolution, file name)
-% close(hFig)
+outname = sprintf('FullDataDistributions_%s',station_nm);
+hFig = gcf;
+hFig.PaperUnits = 'inches';
+hFig.PaperSize = [8.5 11];
+hFig.PaperPosition = [0 0 7 7];
+%mtit(hFig,'Test');  Use this for overall title if you want
+print(hFig,'-dpng','-r350',outname) %saves the figure, (figure, filetype, resolution, file name)
+close(hFig)
+
 
 %% Now to plot distributions of wind speed by wind direction
 
@@ -69,6 +73,17 @@ ylabel('Frequency')
 w = sprintf('Wind Speeds - West (258.75%c - 281.25%c)', char(176), char(176));
 title(w)
 
+cd('../histByDirection')
+%Save the figure
+outname = sprintf('WindsByDirection_%s',station_nm);
+hFig = gcf;
+hFig.PaperUnits = 'inches';
+hFig.PaperSize = [8.5 11];
+hFig.PaperPosition = [0 0 7 7];
+%mtit(hFig,'Test');  Use this for overall title if you want
+print(hFig,'-dpng','-r350',outname) %saves the figure, (figure, filetype, resolution, file name)
+close(hFig)
+
 
 
 %% Plot distributions of wind categories by direction 
@@ -92,7 +107,16 @@ xlabel('Wind Direction degrees')
 ylabel('Frequency')
 title('Gale Winds Direction ( > 20 m/s)')
 
-
+cd('../speedByDirection')
+%Save the figure
+outname = sprintf('SpeedCategory_Direction_%s',station_nm);
+hFig = gcf;
+hFig.PaperUnits = 'inches';
+hFig.PaperSize = [8.5 11];
+hFig.PaperPosition = [0 0 7 7];
+%mtit(hFig,'Test');  Use this for overall title if you want
+print(hFig,'-dpng','-r350',outname) %saves the figure, (figure, filetype, resolution, file name)
+close(hFig)
 %% Plot distribution of wind speed categories for each direction
 
 % figure
@@ -121,13 +145,26 @@ xlabel('Month')
 ylabel('Wind Direction (degrees)')
 title('Wind Direction by Month')
 
-%% Pressure Distributions
+cd('../box_plots/winds')
 
-histogram(slp,100)
-xlabel('Pressure (millibars)')
-ylabel('Frequency')
-%histfit(slp, 100) if you want to see the the of the distribution
-title('Distribution of Atmospheric Pressure')
+%Save the figure
+outname = sprintf('WindsByMonth_%s',station_nm);
+hFig = gcf;
+hFig.PaperUnits = 'inches';
+hFig.PaperSize = [8.5 11];
+hFig.PaperPosition = [0 0 7 7];
+%mtit(hFig,'Test');  Use this for overall title if you want
+print(hFig,'-dpng','-r350',outname) %saves the figure, (figure, filetype, resolution, file name)
+close(hFig)
+
+
+%% Pressure Distributions
+% 
+% histogram(slp,100)
+% xlabel('Pressure (millibars)')
+% ylabel('Frequency')
+% %histfit(slp, 100) if you want to see the the of the distribution
+% title('Distribution of Atmospheric Pressure')
 
 
 %% Pressure by month
@@ -136,28 +173,40 @@ title('Pressure by Month')
 xlabel('Month')
 ylabel('Pressure (millibars')
 
+cd('../pressure')
+
+%Save the figure
+outname = sprintf('PressureByMonth_%s',station_nm);
+hFig = gcf;
+hFig.PaperUnits = 'inches';
+hFig.PaperSize = [8.5 11];
+hFig.PaperPosition = [0 0 7 7];
+%mtit(hFig,'Test');  Use this for overall title if you want
+print(hFig,'-dpng','-r350',outname) %saves the figure, (figure, filetype, resolution, file name)
+close(hFig)
+
 
 
 
 %% Pressure by Month with distribution
 
-figure 
-subplot(2,1,1)
-histogram(slp,100)
-xlabel('Pressure (millibars)')
-ylabel('Frequency')
-%histfit(slp, 100) if you want to see the the of the distribution
-title('Distribution of Atmospheric Pressure')
+% figure 
+% subplot(2,1,1)
+% histogram(slp,100)
+% xlabel('Pressure (millibars)')
+% ylabel('Frequency')
+% %histfit(slp, 100) if you want to see the the of the distribution
+% title('Distribution of Atmospheric Pressure')
+% 
+% subplot(2,1,2)
+% boxplot(slp, mo_str)
+% title('Pressure by Month')
+% xlabel('Month')
+% ylabel('Pressure (millibars')
+% 
+% 
 
-subplot(2,1,2)
-boxplot(slp, mo_str)
-title('Pressure by Month')
-xlabel('Month')
-ylabel('Pressure (millibars')
-
-
-
-
+cd('../../../matlab/Climatology')
 
 
 

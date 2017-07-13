@@ -7,7 +7,8 @@
 clearvars
 
 %first load in the data
-dir_nm = '/Users/andrewmcauliffe/Desktop/hourly_data/';
+dir_nm = '../../hourly_data/';
+%dir_nm = '/Users/andrewmcauliffe/Desktop/hourly_data/';
 file_nm = 'whidbey_hourly'; % you will have to change this variable for each station
 load_file = strcat(dir_nm,file_nm);
 load(load_file)
