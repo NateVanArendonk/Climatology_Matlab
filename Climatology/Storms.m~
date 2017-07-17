@@ -361,29 +361,33 @@ MaxEvent_RI = Z./yr_len;
 
 
 
+%% Sea Level Pressure Event Occurence 
+avg_slp = blank{:,9};
+avg_slp = cell2mat(avg_slp);
 
 
+[X,Y] = meshgrid(3:1:48,10:1:30);
+Z = zeros(size(X));
 
+for x = 1:length(X(1,:))                                                   % For every value in mesh of x-axis
+    dur = find(duration >= (X(1,x)));                                      % Find all the durations that exist longer than current threshold
+    for y = 1:length(X(:,1))                                               % For every value in mesh of y-axi                                  % Find all locations of durations longer than current threshold
+        spd = find(max_spd(dur) >= Y(y,1));                                % Of those durations, find all winds that are larger than current threshold
+        if ~isempty(spd)
+            Z(y,x) = length(spd);
+        else
+            Z(y,x) = 0;
+        end
+    end
+end
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+figure
+imagesc(3:1:48,10:1:30,log10(Z))
+set(gca,'YDir','normal') % set to normal Y scale
+colorbar
+ylabel('Maximum Wind Speed [m/s]')
+xlabel('Duration [hr]')
+title('Wind Duration vs Speed Threshold - Log Transform')
 
 
 
