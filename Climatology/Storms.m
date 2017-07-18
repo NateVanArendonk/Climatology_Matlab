@@ -240,40 +240,26 @@ for i = 1:length(storm)
         storm{i,15} = 'West';
     end
 end
-        
+
+% Add the year the event occured
+for i = 1:length(storm)
+    storm{i,16} = year(time(storm{i,1}));
+end
 
 % Now add a header to the cell array
 
 header = {'Start', 'End', 'Duration', 'Max Speed', 'Min Speed'...
     'Avg. Speed', 'Speed Variance', 'Max Pres', 'Min Pres',...
     'Avg. Pres', 'Pres. Variance', 'Avg. Direction',...
-    'Dominant Direction', 'Storm Season', 'Storm Direction'};  
+    'Dominant Direction', 'Storm Season', 'Storm Direction', 'Year'};  
 
 % Add header
 blank = storm;                                                             % blank is the same data without header for use of adding data later on
 storm = [header; storm];      
 
 %% Make a Color Map of duration vs speed
-% What I want is a color map showing events lasting longer than specific
-% thresholds that are above certain thresholds.  
 
-
-
-
-%%Example of colormap
-% size = 50;
-% z = zeros(size, size);
-% for r = 1:size
-%     for c = 1:size
-%         z(r,c) = r+c;
-%     end
-% end
-% fig = figure;
-% 
-% colormap('hot');
-% imagesc(z);
-% colorbar;
-
+% Grab and create the variables that I want
 duration = blank(:,3);                                                     % Duration variable
 duration = cell2mat(duration); 
 
@@ -312,22 +298,14 @@ ylabel('Average Wind Speed [m/s]')
 xlabel('Duration [hr]')
 title('Wind Duration vs Speed Threshold - Log Transform')
 
-
-% figure
-% surf(X,Y,log10(Z),'EdgeColor','None');
-% view(2);
-% colorbar
-% ylabel('Wind Speed [m/s]')
-
- 
 % Calculate the event recurrence interval for wind speeds
 %---------Notes--------------
 % The above plot calculates the number of hits per year for a specific wind
 % speed at various durations.  Thus knowing the number of years on the
 % record, I can then take each number of counts and divide by the number of
 % years to find the yearly recurrence interval.  
-
-yr_len = abs(year(time(1)) - year(time(end)));
+yr_vec = year(time(1)):year(time(end));
+yr_len = length(yr_vec);
 AvgEvent_RI = Z./yr_len;
 
 %% Color map for Max wind speeds 
@@ -355,17 +333,76 @@ ylabel('Maximum Wind Speed [m/s]')
 xlabel('Duration [hr]')
 title('Wind Duration vs Speed Threshold - Log Transform')
 
-
 % Calculate Event Recurrence for Max winds
 MaxEvent_RI = Z./yr_len;
 
+%% Occurences by Year
+hits_vec = NaN(length(yr_vec), 1);
+hits12_vec = NaN(length(yr_vec), 1);
+starts = blank(:,1);                                                       % Grab the beginning of Events
+starts = cell2mat(starts);                                                 % Convert from Cell to Double
 
 
+for yr = 1:length(yr_vec)                                                  % For every year
+    hits = find(year(time(cell2mat(blank(:,1)))) == yr_vec(yr));           % Find all the events per year
+    hits12 = find(duration(hits) >= 12);                                   % Of those events, Find the ones that last longer than 12 hours
+    
+    hits_vec(yr) = length(hits);                                           % Add them to the list
+    hits12_vec(yr) = length(hits12);
+end
 
 
+% Now plot the results
+clf 
+
+subplot(2,1,1)
+plot(yr_vec, hits_vec)
+xlabel('Time [years]')
+ylabel('Number of Events')
+title('Events by Year')
+
+subplot(2,1,2)
+plot(yr_vec, hits12_vec)
+xlabel('Time [years]')
+ylabel('Number of Events')
+title('Events Lasting 12+ Hours')
 
 
+%% Make a plot of Number of Occurences per year
 
+% using avg_spd variable above I will generate plots of number of events
+% per year
+
+thresh_vec = 2:2:26;                                                       % This will be the vector of thresholds I am looking at
+avg_vec = NaN(1,length(thresh_vec));
+max_vec = NaN(1,length(thresh_vec));
+
+for n = 1:length(thresh_vec)
+    avg_vec(n) = length(find(avg_spd >= thresh_vec(n)));                   % Find all the locations the average speed is above the current threshold
+    max_vec(n) = length(find(max_spd >= thresh_vec(n)));                   % Find all locations where max speed is above current threshold
+end
+    
+figure
+plot(thresh_vec, avg_vec)
+hold on
+plot(thresh_vec, max_vec)
+legend('Average Speed', 'Max Speed');
+xlabel('Wind Speed [m/s]')
+ylabel('Number of Occurences')
+title('Total Number of Occurences')
+
+%% Now for by year
+
+avg_vec = avg_vec./yr_len;                                                 % Divide number of occurences by year of record
+max_vec = max_vec./yr_len;
+figure
+plot(thresh_vec, avg_vec)
+hold on
+plot(thresh_vec, max_vec)
+legend('Average Speed', 'Max Speed');
+xlabel('Wind Speed [m/s]')
+ylabel('Number of Occurences')
+title('Number of Occurences per Year')
 
 
 
