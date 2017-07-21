@@ -145,21 +145,43 @@ end
 clf
 station_data.time = station_data.time_copy;
 nan_inds.slp = find(isnan(station_data.slp));
-if length(nan_inds.slp) > 0
+% if length(nan_inds.slp) > 0
+%     station_data.slp(nan_inds.slp) = [];
+%     station_data.time(nan_inds.slp) = [];
+% end
+% %find indicies of unique values for Interp
+% [~, II] = unique(station_data.time);
+% B.slp = interp1(station_data.time(II), station_data.slp(II), B.time, 'linear');
+% clear II
+% 
+% %Plot interp vs observed
+% plot(station_data.time, station_data.slp, '*')
+% hold on
+% plot(B.time, B.slp)
+% datetick()
+% ylabel('sea level pressure')
+
+
+if length(nan_inds.slp) ~= length(station_data.slp) 
     station_data.slp(nan_inds.slp) = [];
     station_data.time(nan_inds.slp) = [];
-end
 %find indicies of unique values for Interp
-[~, II] = unique(station_data.time);
-B.slp = interp1(station_data.time(II), station_data.slp(II), B.time, 'linear');
-clear II
+    [~, II] = unique(station_data.time);
+    B.slp = interp1(station_data.time(II), station_data.slp(II), B.time, 'linear');
+    clear II
 
 %Plot interp vs observed
-plot(station_data.time, station_data.slp, '*')
-hold on
-plot(B.time, B.slp)
-datetick()
-ylabel('sea level pressure')
+    plot(station_data.time, station_data.slp, '*')
+    hold on
+    plot(B.time, B.slp)
+    datetick()
+    ylabel('sea level pressure')
+
+   
+elseif length(nan_inds.slp) == length(station_data.slp)
+    fprintf('No Values for sea level pressure')
+    B.slp = 0;
+end
 
 %% Find NaNs in Station Pressure and Remove them 
 %Big Data gap with this parameter
@@ -184,6 +206,7 @@ if length(nan_inds.stp) ~= length(station_data.stp)
    
 elseif length(nan_inds.stp) == length(station_data.stp)
     fprintf('No Values for station pressure')
+    B.stp = 0;
 end
 B.time = B.time';
 B.wndspd = B.wndspd';

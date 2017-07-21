@@ -1,3 +1,9 @@
+function out = FormatData(file_nm)
+
+
+% split up the file type from the file extension
+[path, name, ext] = fileparts(file_nm);
+
 %% Script to convert data to correct format (units) for analysis
 
 % Note, this script should only be ran for data that is a full time series,
@@ -14,9 +20,9 @@
 % % % % load(strcat(dir_nm, file_loc, file_nm, '.mat'))
 % % % % clear dir_nm file_loc 
 % % % % %load('/Users/andrewmcauliffe/Desktop/Downloaded Raw Data/whidbey_nas.mat');
+dir_loc = '../../Downloaded Raw Data';
 
-
-load(strcat(file_nm, '.mat'))
+load(strcat(dir_loc,'/',file_nm))
 
 %% Variables that change every time, but need to be updated
 
@@ -110,7 +116,7 @@ if ~isfield(station_data, 'usaf') % so if the data is not in the correct format,
     clear ans elevation I nan_inds scaled_height station_data surface_type
 
     %% Save Data
-    outname = sprintf('%s_hourly',file_nm);
+    outname = sprintf('%s_hourly',name);
     cd('../../hourly_data')
     save(outname,'-struct','B');
     cd('../matlab/Matlab_Structure')
@@ -154,8 +160,11 @@ else
     clear ans elevation I nan_inds scaled_height station_data surface_type
 
     %% Save Data
-    outname = sprintf('%s_hourly',file_nm);
+    outname = sprintf('%s_hourly',name);
     cd('../../hourly_data')
     save(outname,'-struct','B');
     cd('../matlab/Matlab_Structure')
 end
+
+end
+

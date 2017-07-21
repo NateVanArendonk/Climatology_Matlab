@@ -18,6 +18,10 @@
 %Finally, the code goes and converts the data into correct format and units
 %6/21/17 I moved this part of the code to the FormatData code
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% What to save data as 
+outname = 'sanderson_field';
+
+
 %%
 %create new empty structure to put combined data in
 station_data = struct();
@@ -30,12 +34,12 @@ station_data.hr = [];
 station_data.mn = [];
 station_data.wnddir = [];
 station_data.wndspd = [];
-station_data.wndmaxspd = cell(0);
+%station_data.wndmaxspd = cell(0);
 station_data.airtemp = [];
 station_data.dewp = [];
 station_data.slp = [];
 station_data.alt = [];
-station_data.stp = cell(0);
+station_data.stp = [];
 %station_data.pcp01 = [];
 %station_data.pcp06 = cell(0);
 %station_data.pcp24 = cell(0);
@@ -54,7 +58,7 @@ for i = 2:length(one.USAF);
     station_data.mn(end+1) = one.MN(i);
     station_data.wnddir(end+1) = one.DIR(i);
     station_data.wndspd(end+1) = one.SPD(i);
-    station_data.wndmaxspd(end+1) = one.GUS(i);
+    %station_data.wndmaxspd(end+1) = one.GUS(i);
     station_data.airtemp(end+1) = one.TEMP(i);
     station_data.dewp(end+1) = one.DEWP(i);
     station_data.slp(end+1) = one.SLP(i);
@@ -76,7 +80,7 @@ for i = 2:length(two.USAF);
     station_data.mn(end+1) = two.MN(i);
     station_data.wnddir(end+1) = two.DIR(i);
     station_data.wndspd(end+1) = two.SPD(i);
-    station_data.wndmaxspd(end+1) = two.GUS(i);
+    %station_data.wndmaxspd(end+1) = two.GUS(i);
     station_data.airtemp(end+1) = two.TEMP(i);
     station_data.dewp(end+1) = two.DEWP(i);
     station_data.slp(end+1) = two.SLP(i);
@@ -88,49 +92,49 @@ for i = 2:length(two.USAF);
 end
 clear i
 %%
-for i = 2:length(three.USAF);
-    station_data.usaf(end+1) = three.USAF(i);
-    station_data.wban(end+1) = three.WBAN(i);
-    station_data.yr(end+1) = three.YR(i);
-    station_data.mo(end+1) = three.MO(i);
-    station_data.da(end+1) = three.DA(i);
-    station_data.hr(end+1) = three.HR(i);
-    station_data.mn(end+1) = three.MN(i);
-    station_data.wnddir(end+1) = three.DIR(i);
-    station_data.wndspd(end+1) = three.SPD(i);
-    station_data.wndmaxspd(end+1) = three.GUS(i);
-    station_data.airtemp(end+1) = three.TEMP(i);
-    station_data.dewp(end+1) = three.DEWP(i);
-    station_data.slp(end+1) = three.SLP(i);
-    station_data.alt(end+1) = three.ALT(i);
-    station_data.stp(end+1) = three.STP(i);
-    %station_data.pcp01(end+1) = three.PCP01(i);
-    %station_data.pcp06(end+1) = three.PCP06(i);
-    %station_data.pcp24(end+1) = three.PCP24(i);
-end
-clear i
+% for i = 2:length(three.USAF);
+%     station_data.usaf(end+1) = three.USAF(i);
+%     station_data.wban(end+1) = three.WBAN(i);
+%     station_data.yr(end+1) = three.YR(i);
+%     station_data.mo(end+1) = three.MO(i);
+%     station_data.da(end+1) = three.DA(i);
+%     station_data.hr(end+1) = three.HR(i);
+%     station_data.mn(end+1) = three.MN(i);
+%     station_data.wnddir(end+1) = three.DIR(i);
+%     station_data.wndspd(end+1) = three.SPD(i);
+%     %station_data.wndmaxspd(end+1) = three.GUS(i);
+%     station_data.airtemp(end+1) = three.TEMP(i);
+%     station_data.dewp(end+1) = three.DEWP(i);
+%     station_data.slp(end+1) = three.SLP(i);
+%     station_data.alt(end+1) = three.ALT(i);
+%     station_data.stp(end+1) = three.STP(i);
+%     %station_data.pcp01(end+1) = three.PCP01(i);
+%     %station_data.pcp06(end+1) = three.PCP06(i);
+%     %station_data.pcp24(end+1) = three.PCP24(i);
+% end
+% clear i
 %%
-for i = 2:length(four.USAF);
-   station_data.usaf(end+1) = four.USAF(i);
-    station_data.wban(end+1) = four.WBAN(i);
-    station_data.yr(end+1) = four.YR(i);
-    station_data.mo(end+1) = four.MO(i);
-    station_data.da(end+1) = four.DA(i);
-    station_data.hr(end+1) = four.HR(i);
-    station_data.mn(end+1) = four.MN(i);
-    station_data.wnddir(end+1) = four.DIR(i);
-    station_data.wndspd(end+1) = four.SPD(i);
-    station_data.wndmaxspd(end+1) = four.GUS(i);
-    station_data.airtemp(end+1) = four.TEMP(i);
-    station_data.dewp(end+1) = four.DEWP(i);
-    station_data.slp(end+1) = four.SLP(i);
-    station_data.alt(end+1) = four.ALT(i);
-    station_data.stp(end+1) = four.STP(i);
-    %station_data.pcp01(end+1) = four.PCP01(i);
-    %station_data.pcp06(end+1) = four.PCP06(i);
-    %station_data.pcp24(end+1) = four.PCP24(i);
-end
-clear i
+% for i = 2:length(four.USAF);
+%    station_data.usaf(end+1) = four.USAF(i);
+%     station_data.wban(end+1) = four.WBAN(i);
+%     station_data.yr(end+1) = four.YR(i);
+%     station_data.mo(end+1) = four.MO(i);
+%     station_data.da(end+1) = four.DA(i);
+%     station_data.hr(end+1) = four.HR(i);
+%     station_data.mn(end+1) = four.MN(i);
+%     station_data.wnddir(end+1) = four.DIR(i);
+%     station_data.wndspd(end+1) = four.SPD(i);
+%     %station_data.wndmaxspd(end+1) = four.GUS(i);
+%     station_data.airtemp(end+1) = four.TEMP(i);
+%     station_data.dewp(end+1) = four.DEWP(i);
+%     station_data.slp(end+1) = four.SLP(i);
+%     station_data.alt(end+1) = four.ALT(i);
+%     station_data.stp(end+1) = four.STP(i);
+%     %station_data.pcp01(end+1) = four.PCP01(i);
+%     %station_data.pcp06(end+1) = four.PCP06(i);
+%     %station_data.pcp24(end+1) = four.PCP24(i);
+% end
+% clear i
 %% Transpose the data horizontally to vertical configuration 
 station_data.usaf = station_data.usaf';
 station_data.wban = station_data.wban';
@@ -141,7 +145,7 @@ station_data.hr = station_data.hr';
 station_data.mn = station_data.mn';
 station_data.wnddir = station_data.wnddir';
 station_data.wndspd = station_data.wndspd';
-station_data.wndmaxspd = station_data.wndmaxspd';
+%station_data.wndmaxspd = station_data.wndmaxspd';
 station_data.airtemp = station_data.airtemp';
 station_data.dewp = station_data.dewp';
 station_data.slp = station_data.slp';
@@ -189,8 +193,8 @@ station_data.dtnum = station_data.dtnum';
 
 
 % Convert cells to double 
-station_data.wndmaxspd = str2double(station_data.wndmaxspd(:,1));
-station_data.stp = str2double(station_data.stp(:,1));
+%station_data.wndmaxspd = str2double(station_data.wndmaxspd(:,1));
+%station_data.stp = str2double(station_data.stp(:,1));
 
 
 % % %% Convert to correct format - This is also in the function long_to_correct_data
@@ -237,6 +241,8 @@ station_data.stp = str2double(station_data.stp(:,1));
 % % station_data.pcp24 = station_data.pcp24 * 2.54; %Converts inches to cm for precip. data
 % % 
 
-
+cd('../../Downloaded Raw Data')
+save(outname);
+cd('../matlab/Matlab_Structure')
 
 

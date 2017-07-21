@@ -3,14 +3,19 @@
 clearvars
 
 %first load in the data
-dir_nm = '/Users/andrewmcauliffe/Desktop/hourly_data/';
-station_name = 'Whidbey NAS';
-station_nm = 'Whidbey_NAS';
-file_nm = 'whidbey_hourly'; % you will have to change this variable for each station
-load_file = strcat(dir_nm,file_nm);
+dir_nm = '../../hourly_data/';
+%dir_nm = '/Users/andrewmcauliffe/Desktop/hourly_data/';
+station_name = 'SeaTac';
+station_nm = 'seatac';
+%file_nm = 'whidbey_nas_hourly'; % you will have to change this variable for each station
+load_file = strcat(dir_nm,station_nm, '_hourly');
 load(load_file)
 clear dir_nm file_nm load_file
 wnddir = wnddir';
+
+% for NDBC data get rid of 'hourly' in load_file 
+% Also add the following line after wnddir = wndir';
+            % wndspd = wndspd_obs;
 
 
 %% Find yearly max
@@ -54,15 +59,17 @@ hold on
 subplot(2,2,[1 3])
 bar(histgrid,myhist,'FaceColor',[.8 .8 1])
 line(xgrid,pdf);
-title('GEV - PDF')
+plot_tit = sprintf('GEV - PDF - %s', station_name);
+title(plot_tit)
 
 % Plot Parameters
 ax = gca;  % Play with the Axes 
-ax.XLim = [10 28];
+ax.XLim = [10 27];
+
 
 % Add GEV parameters to the plot
 tbox = sprintf('mu = %4.2f \nsigma = %4.2f \nk = %4.2f',paramEsts(1),paramEsts(2),paramEsts(3));
-text(21,0.3, tbox)
+text(20,0.2, tbox)
 
 xlabel('Max Hourly Wind Speed Obs[m/s]')
 ylabel('Probability')
