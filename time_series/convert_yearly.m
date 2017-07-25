@@ -1,8 +1,16 @@
 %% Get the yearly average 
+ 
+clearvars
+file_nm = 'whidbey_nas'; % change this to the location of interest
+dir_nm = '../../hourly_data/';
+%dir_nm = '/Users/andrewmcauliffe/Desktop/hourly_data/';
+file_load = strcat(dir_nm, file_nm, '_hourly.mat');
 
-%Load in data, this will change a lot
-load('/Users/andrewmcauliffe/Desktop/Matlab/Matlab_Structure/downloaded_data/Whidbey_hourly.mat')
-%wind direction for some reason isn't in the correct format so change it
+
+%load in the data
+load(file_load)
+clear stn_nm dir_nm file_load file_nm
+
 wnddir = wnddir';
 
 %%

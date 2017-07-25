@@ -1,7 +1,7 @@
 %% Code to create a wind rose diagram from hourly time series data
 clearvars
 
-file_nm = 'van_harbor_hourly.mat'; % change this to the location of interest
+file_nm = 'sentry_shoal_hourly.mat'; % change this to the location of interest
 file_loc = '../../hourly_data/';
 file_load = strcat(file_loc, file_nm);
 
@@ -10,8 +10,8 @@ load(file_load)
 clear stn_nm file_loc file_load
 
 %% Plot the Wind Rose
-data_type = 'NDBC';
-station_nm = 'van_harbor';  %Change this depending on station
+data_type = 'CA_NDBC';
+station_nm = 'sentry_shoal';  %Change this depending on station
 options.nDirections = 36;
 %sta_num = [1 2 3 4 5];
 options.vWinds = [0 5 10 15 20 25]; %Specify the wind speeds that you want to appear on the windrose

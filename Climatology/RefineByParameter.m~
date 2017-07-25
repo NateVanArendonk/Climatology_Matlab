@@ -23,10 +23,9 @@
 %     wndspd = wndspd_obs;
 % end
 
-if length(slp) < 2  %Just in case there is no pressure data
+if length(slp) < 2
     slp = zeros(length(wndspd), 1);
 end
-
 southI = find(wnddir > 90 & wnddir <= 191.25);
 southI = southI';
 south.wnddir = wnddir(southI);

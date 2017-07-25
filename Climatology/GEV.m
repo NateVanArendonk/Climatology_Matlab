@@ -5,13 +5,14 @@ clearvars
 %first load in the data
 dir_nm = '../../hourly_data/';
 %dir_nm = '/Users/andrewmcauliffe/Desktop/hourly_data/';
-station_name = 'SeaTac';
-station_nm = 'seatac';
+station_name = 'Halibut Bank';
+station_nm = 'halibut_bank';
 %file_nm = 'whidbey_nas_hourly'; % you will have to change this variable for each station
 load_file = strcat(dir_nm,station_nm, '_hourly');
 load(load_file)
 clear dir_nm file_nm load_file
 wnddir = wnddir';
+
 
 % for NDBC data get rid of 'hourly' in load_file 
 % Also add the following line after wnddir = wndir';
@@ -24,10 +25,26 @@ yr_vec = year(time(1)):year(time(end)); %make a year vec
 maxima = NaN(length(yr_vec),1); %create vector to house all of the block maxima
 for i = 1:length(yr_vec)
     yr_ind = find(year(time) == yr_vec(i));
+    % If there is more than 50% of the hours missing for that year, I will
+    % skip it
+    if length(yr_ind) < 8760 * .5
+        continue
+    else
     %max_val = max(wndspd(yr_ind));
-    maxima(i) = max(wndspd(yr_ind));
+        maxima(i) = max(wndspd(yr_ind));
+    end
 end
-clear i
+
+nan_ind = isnan(maxima); % Find any nans and get rid of them
+maxima(nan_ind) = [];
+
+del_ind = find(maxima < 10);   % find indices less than 10, likely indicating poor data coverage or a large data gap
+maxima(del_ind) = []; % get rid of data
+yr_vec(del_ind) = []; % get rid of year from year vec
+
+
+clear j yr_ind
+
 % Get GEV statistics about the data
 [paramEsts, paramCIs] = gevfit(maxima);
 %----------------Results from GEV-------------------------------
@@ -35,76 +52,84 @@ clear i
 % % % sigmaMLE = paramEsts(2);    % Scale parameter
 % % % muMLE = paramEsts(3);       % Location parameter
 %% Plot the GEV
+% I tinkered with GEV_Test and found a plot that I like better than current
+% version below
+% Modified from example from link below
+%https://www.mathworks.com/help/stats/examples/modelling-data-with-the-generalized-extreme-value-distribution.html
+
+%lowerBnd = paramEsts(3)-paramEsts(2)./paramEsts(1);
+lowerBnd = 0;
 x = maxima;  
-nblocks = length(maxima); 
-x_min = 0;
-x_max = 30;
-x_bin = 0.1;
-hist_bin = 0.5;
+xmax = 1.1*max(x);
+bins = floor(lowerBnd):ceil(xmax);
 
-% Calculate GEV Parameters
-paramEsts = gevfit(x);  % grab GEV values 
-xgrid = 0:x_bin:30;  % create evenly spaced grid
-histgrid = x_min:hist_bin:x_max;  % create locations for bars
-pdf = gevpdf(xgrid,paramEsts(1),paramEsts(2), paramEsts(3));  % create PDF from GEV parameters
-cdf = 1 - gevcdf(xgrid,paramEsts(1),paramEsts(2),paramEsts(3)); % create CDF from GEV PDF
-
-%-------Note----------%
-% Height on CDF refers to area under curve on PDF, and thus the probability
-
-% Now plot the GEV with Block Maxima
-myhist = histc(x,histgrid);  % counts the number of values within the binned ranges of histgrid
-myhist = myhist/sum(myhist*hist_bin);
-hold on
+% plot the hist with GEV line
 subplot(2,2,[1 3])
-bar(histgrid,myhist,'FaceColor',[.8 .8 1])
-line(xgrid,pdf);
+h = bar(bins,histc(x,bins)/length(x),'histc');
+h.FaceColor = [.8 .8 .8];
+xgrid = linspace(lowerBnd,xmax,100);
+line(xgrid,gevpdf(xgrid,paramEsts(1),paramEsts(2),paramEsts(3)));
+xlim([lowerBnd xmax]);
 plot_tit = sprintf('GEV - PDF - %s', station_name);
 title(plot_tit)
 
-% Plot Parameters
 ax = gca;  % Play with the Axes 
-ax.XLim = [10 27];
-
-
+ax.XLim = [8 xmax];
 % Add GEV parameters to the plot
 tbox = sprintf('mu = %4.2f \nsigma = %4.2f \nk = %4.2f',paramEsts(1),paramEsts(2),paramEsts(3));
-text(20,0.2, tbox)
+text(10,0.15, tbox)
 
-xlabel('Max Hourly Wind Speed Obs[m/s]')
-ylabel('Probability')
+xlabel('Max Hourly Wind Speed Obs [m/s]')
+ylabel('Probability Density')
 %legend('Hourly','Six-Hr Avg.','Location','NorthEast')
 box on
 
+% Calculate the CDF
+cdf = 1 - gevcdf(xgrid,paramEsts(1),paramEsts(2),paramEsts(3)); % create CDF from GEV PDF
 
-%% Plot Hist and GEV
+% % % % % % % % % x = maxima;  
+% % % % % % % % % nblocks = length(maxima); 
+% % % % % % % % % x_min = 8;
+% % % % % % % % % x_max = 37;
+% % % % % % % % % x_bin = 0.1;
+% % % % % % % % % hist_bin = 0.5;
+% % % % % % % % % 
+% % % % % % % % % % Calculate GEV Parameters
+% % % % % % % % % paramEsts = gevfit(x);  % grab GEV values 
+% % % % % % % % % xgrid = x_min:x_bin:x_max;  % create evenly spaced grid
+% % % % % % % % % histgrid = x_min:hist_bin:x_max;  % create locations for bars
+% % % % % % % % % pdf = gevpdf(xgrid,paramEsts(1),paramEsts(2), paramEsts(3));  % create PDF from GEV parameters
+% % % % % % % % % cdf = 1 - gevcdf(xgrid,paramEsts(1),paramEsts(2),paramEsts(3)); % create CDF from GEV PDF
+% % % % % % % % % 
+% % % % % % % % % %-------Note----------%
+% % % % % % % % % % Height on CDF refers to area under curve on PDF, and thus the probability
+% % % % % % % % % 
+% % % % % % % % % % Now plot the GEV with Block Maxima
+% % % % % % % % % myhist = histc(x,histgrid);  % counts the number of values within the binned ranges of histgrid
+% % % % % % % % % myhist = myhist/sum(myhist*hist_bin);
+% % % % % % % % % hold on
+% % % % % % % % % subplot(2,2,[1 3])
+% % % % % % % % % bar(histgrid,myhist,'FaceColor',[.8 .8 1])
+% % % % % % % % % line(xgrid,pdf);
+% % % % % % % % % plot_tit = sprintf('GEV - PDF - %s', station_name);
+% % % % % % % % % title(plot_tit)
+% % % % % % % % % 
+% % % % % % % % % % Plot Parameters
+% % % % % % % % % ax = gca;  % Play with the Axes 
+% % % % % % % % % ax.XLim = [10 37];
+% % % % % % % % % 
+% % % % % % % % % 
+% % % % % % % % % % Add GEV parameters to the plot
+% % % % % % % % % tbox = sprintf('mu = %4.2f \nsigma = %4.2f \nk = %4.2f',paramEsts(1),paramEsts(2),paramEsts(3));
+% % % % % % % % % text(20,0.2, tbox)
+% % % % % % % % % 
+% % % % % % % % % xlabel('Max Hourly Wind Speed Obs[m/s]')
+% % % % % % % % % ylabel('Probability')
+% % % % % % % % % %legend('Hourly','Six-Hr Avg.','Location','NorthEast')
+% % % % % % % % % box on
 
-%---------Old Way, Use Method Above, provides a finer resolution-----------
-% uprbnd = 1.1*max(maxima); %upper bound
-% lowerBnd = min(maxima)/1.1;  %lower bound
-% bins = floor(lowerBnd):ceil(uprbnd);  %number of bins
-% h = bar(bins,histc(maxima,bins)/length(maxima),'histc'); %plot the hist
-% h.FaceColor = [.9 .9 .9]; %coloring
-% ygrid = linspace(lowerBnd,uprbnd,100);  %line for GEV fit
-% line(ygrid,gevpdf(ygrid,kMLE,sigmaMLE,muMLE));  %plot the line
-% xlabel('Block Maximum');
-% ylabel('Probability Density');
-% xlim([lowerBnd uprbnd]);
-% 
-% 
-% tbox = sprintf('mu = %4.2f \nsigma = %4.2f \nk = %4.2f',paramEsts(1),paramEsts(2),paramEsts(3));
-% %text(ax.XLim(1)*1.01,ax.YLim(2)*.9,tbox)
-% text(20,0.3, tbox)
-% 
-% 
-%% Save the Plot
-% % outname = sprintf('GEV_%s',station_nm);
-% % hFig = gcf;
-% % hFig.PaperUnits = 'inches';
-% % hFig.PaperSize = [8.5 11];
-% % hFig.PaperPosition = [0 0 7 7];
-% % print(hFig,'-dpng','-r350',outname) %saves the figure, (figure, filetype, resolution, file name)
-% % close(hFig)
+
+
 
 
 %% Calculate Recurrence Interval
@@ -119,7 +144,7 @@ plot(xgrid, RI)
 ylim([0 100])
 plot_tit = sprintf('Recurrence Interval - %s', station_name);
 title(plot_tit)
-xlabel('Wind Speed[m/s]')
+xlabel('Wind Speed [m/s]')
 ylabel('Time [years]')
 
 

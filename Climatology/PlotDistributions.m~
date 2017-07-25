@@ -5,17 +5,16 @@
 % - Hist by direction of speed - done
 % - Bar graph of speed by month - done
 
+clearvars
 
 %first load in the data
-%dir_nm = '../../hourly_data/';
+dir_nm = '../../hourly_data/';
 %dir_nm = '/Users/andrewmcauliffe/Desktop/hourly_data/';
-%file_nm = 'obs_angeles'; % you will have to change this variable for each station
+file_nm = 'whidbey'; % you will have to change this variable for each station
 load_file = strcat(dir_nm,file_nm);
 load(load_file)
-%clear dir_nm file_nm load_file
+clear dir_nm file_nm load_file
 wnddir = wnddir';
-
-
 
 
 
@@ -25,6 +24,7 @@ wnddir = wnddir';
 RefineByParameter
 %% Plot distributions for full data
 
+station_nm = 'Whidbey_NAS';
 
 figure
 subplot(3,1,1)
@@ -48,7 +48,7 @@ title('Pressure - millibars')
 xlabel('Pressure (mb)')
 ylabel('Frequency')
 
-cd('../../Matlab_Figures/Distributions/hists')
+cd('../../Distributions/hists')
 %gtext('test')
 
 %Save the figure
@@ -220,7 +220,7 @@ close(hFig)
 % 
 % 
 
-cd('../../../../matlab/Climatology')
+cd('../../../matlab/Climatology')
 
 
 

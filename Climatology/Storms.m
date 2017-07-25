@@ -2,9 +2,9 @@ clearvars
 
 %first load in the data
 %dir_nm = '/Users/andrewmcauliffe/Desktop/hourly_data/';
-dir_nm = '../../';                                                         % goes back 2 directories, to the desktop directory
-file_nm = '/hourly_data/whidbey_nas_hourly';                                   % you will have to change this variable for each station
-load_file = strcat(dir_nm,file_nm);
+dir_nm = '../../hourly_data/';                                                         % goes back 2 directories, to the desktop directory
+file_nm = 'whidbey_nas';                                   % you will have to change this variable for each station
+load_file = strcat(dir_nm,file_nm, '_hourly');
 load(load_file)
 clear dir_nm file_nm load_file
 wnddir = wnddir';
@@ -404,171 +404,136 @@ xlabel('Wind Speed [m/s]')
 ylabel('Number of Occurences')
 title('Number of Occurences per Year')
 
+%% Direction through time heat map
 
-% Address Pressure Next
+% Grab and create the variables that I want
+duration = blank(:,3);                                                     % Duration variable
+duration = cell2mat(duration); 
 
+avg_spd = blank(:,6);                                                      % Average Speed variable
+avg_spd = cell2mat(avg_spd);
 
-
-
-
-
-
-
-
-
-
+max_spd = blank(:,4);                                                      % Max Speed variable
+max_spd = cell2mat(max_spd);
 
 
+% First make the grid, I am going from 0:48 on the x-axis because I am going
+% to have 16 'bins' -> 0-3, 3-6, 6-9 etc. all the way to 48
+% For y-axis I am having 15 'bins' and looking at wind increments of 2 m/s
+% starting from zero all the way to 30.  
+
+[X,Y] = meshgrid(3:1:48,10:1:30);
+Z = zeros(size(X));
+
+for x = 1:length(X(1,:))                                                   % For every value in mesh of x-axis
+    dur = find(duration >= (X(1,x)));                                      % Find all the durations that exist longer than current threshold
+    for y = 1:length(X(:,1))                                               % For every value in mesh of y-axi                                  % Find all locations of durations longer than current threshold
+        spd = find(avg_spd(dur) >= Y(y,1));                                % Of those durations, find all winds that are larger than current threshold
+        if ~isempty(spd)
+            Z(y,x) = length(spd);
+        else
+            Z(y,x) = 0;
+        end
+    end
+end
+
+figure
+imagesc(3:1:48,10:1:30,log10(Z))
+set(gca,'YDir','normal') % set to normal Y scale
+colorbar
+ylabel('Average Wind Speed [m/s]')
+xlabel('Duration [hr]')
+title('Wind Duration vs Speed Threshold - Log Transform')
+
+% Calculate the event recurrence interval for wind speeds
+%---------Notes--------------
+% The above plot calculates the number of hits per year for a specific wind
+% speed at various durations.  Thus knowing the number of years on the
+% record, I can then take each number of counts and divide by the number of
+% years to find the yearly recurrence interval.  
+yr_vec = year(time(1)):year(time(end));
+yr_len = length(yr_vec);
+AvgEvent_RI = Z./yr_len;
+
+%% Color map for Max wind speeds 
+y1 = year(time(1));
+y2 = year(time(end));
+x1 = 10;
+xBy = 10;  % Use this to see if binning is occuring
+xB2 = 20;  % Use this to plot coarser winds to show change thru time
 
 
+[X,Y] = meshgrid(x1:xBy:360,y1:1:y2);
+Z = zeros(size(X));   % make empty grid
+
+for y = 1:length(Y(:,1))                                                   % For every value in Y
+    yr_ind = find(year(time) == Y(y));                                     % Find that current year
+    for x = 1:length(X(1,:))                                               % For every value in x
+        if x == 1                                                          % First value only
+            dir_ind = find(wnddir(yr_ind) <= X(1,x));                      % Find all directions between 0 and first threshold
+            if isempty(dir_ind)                                            % If it's empty
+                Z(y,x) = 0;                                                % Set it equal to zero
+            else
+                Z(y,x) = length(dir_ind);                                  % Otherwise populate Z with length of hits
+            end
+        else
+            dir_ind = find(wnddir(yr_ind) <= X(1,x) & wnddir(yr_ind) > X(1, x-1));  % Find all directions between current and 1 less threshold
+            if isempty(dir_ind)
+                Z(y,x) = 0;
+            else
+                Z(y,x) = length(dir_ind);
+            end
+        end
+    end
+end
+        
+    
+
+figure
+%imagesc(10:10:360,yr1:1:yr2,log10(Z))
+imagesc(x1:xBy:360,y1:1:y2, Z)
+set(gca,'YDir','normal') % set to normal Y scale
+colorbar
+ylabel('Year')
+xlabel('Wind Direction [degrees]')
+title('Wind Direction Through Time')
 
 
+%%  Coarser Plot that doesn't show binning if present
+[X,Y] = meshgrid(x1:xB2:360,y1:1:y2);
+Z = zeros(size(X));   % make empty grid
 
+for y = 1:length(Y(:,1))                                                   % For every value in Y
+    yr_ind = find(year(time) == Y(y));                                     % Find that current year
+    for x = 1:length(X(1,:))                                               % For every value in x
+        if x == 1                                                          % First value only
+            dir_ind = find(wnddir(yr_ind) <= X(1,x));                      % Find all directions between 0 and first threshold
+            if isempty(dir_ind)                                            % If it's empty
+                Z(y,x) = 0;                                                % Set it equal to zero
+            else
+                Z(y,x) = length(dir_ind);                                  % Otherwise populate Z with length of hits
+            end
+        else
+            dir_ind = find(wnddir(yr_ind) <= X(1,x) & wnddir(yr_ind) > X(1, x-1));  % Find all directions between current and 1 less threshold
+            if isempty(dir_ind)
+                Z(y,x) = 0;
+            else
+                Z(y,x) = length(dir_ind);
+            end
+        end
+    end
+end
+        
+    
 
-
-
-
-
-
-
-
-
-%% Code that works but is not useful right now
-% % %% Make a Master Structure
-% % storm = struct();
-% % 
-% % storm.all.events = events;                                                     % Every single event for that station
-% % 
-% % 
-% % %% Refine to grab events lasting 6 hrs or more
-% % beg = beg_master;                                                          % Reinitialize vectors of storms
-% % fin = fin_master;
-% % beg_del = [];                                                              % Empty vector to house values to be deleted
-% % fin_del = [];                                                              % Empty vector to house values to be deleted
-% % 
-% % for i = 1:length(beg)                                                      % For every value in events
-% %     if abs(beg(i) - fin(i)) < 6                                            % If the difference between beginning and end is less than 6
-% %         beg_del(end+1) = i;                                                % Grab indice to delete
-% %         fin_del(end+1) = i;                                                % Grab indice to delete
-% %     end
-% % end
-% % 
-% % beg(beg_del) = [];                                                         % Delete the cells that need to be deleted
-% % fin(fin_del) = [];                        
-% % 
-% % event6 = [beg, fin];                                                       % Create a 6 hour event variable
-% % 
-% % 
-% % %% Refine to grab events lasting 12 hrs or more
-% % beg = beg_master;                                                          % Reinitialize vectors of storms
-% % fin = fin_master;
-% % beg_del = [];                                                              % Empty vector to house values to be deleted
-% % fin_del = [];                                                              % Empty vector to house values to be deleted
-% % 
-% % for i = 1:length(beg)                                                      % For every value in events
-% %     if abs(beg(i) - fin(i)) < 12                                           % If the difference between beginning and end is less than 12
-% %         beg_del(end+1) = i;                                                % Grab indice to delete
-% %         fin_del(end+1) = i;                                                % Grab indice to delete
-% %     end
-% % end
-% % 
-% % beg(beg_del) = [];                                                         % Delete the cells that need to be deleted
-% % fin(fin_del) = [];                        
-% % 
-% % event12 = [beg, fin];                                                       % Create a 12 hour event variable
-% % 
-% % 
-% % %% Refine to grab events lasting 24 hrs or more
-% % beg = beg_master;                                                          % Reinitialize vectors of storms
-% % fin = fin_master;
-% % beg_del = [];                                                              % Empty vector to house values to be deleted
-% % fin_del = [];                                                              % Empty vector to house values to be deleted
-% % 
-% % for i = 1:length(beg)                                                      % For every value in events
-% %     if abs(beg(i) - fin(i)) < 24                                           % If the difference between beginning and end is less than 24
-% %         beg_del(end+1) = i;                                                % Grab indice to delete
-% %         fin_del(end+1) = i;                                                % Grab indice to delete
-% %     end
-% % end
-% % 
-% % beg(beg_del) = [];                                                         % Delete the cells that need to be deleted
-% % fin(fin_del) = [];                        
-% % 
-% % event24 = [beg, fin];     
-% % 
-% % %% Refine to grab events lasting 36 hrs or more
-% % beg = beg_master;                                                          % Reinitialize vectors of storms
-% % fin = fin_master;
-% % beg_del = [];                                                              % Empty vector to house values to be deleted
-% % fin_del = [];                                                              % Empty vector to house values to be deleted
-% % 
-% % for i = 1:length(beg)                                                      % For every value in events
-% %     if abs(beg(i) - fin(i)) < 36                                           % If the difference between beginning and end is less than 36
-% %         beg_del(end+1) = i;                                                % Grab indice to delete
-% %         fin_del(end+1) = i;                                                % Grab indice to delete
-% %     end
-% % end
-% % 
-% % beg(beg_del) = [];                                                         % Delete the cells that need to be deleted
-% % fin(fin_del) = [];                        
-% % 
-% % event36 = [beg, fin];     
-% % 
-% % %% Refine to grab events lasting 48 hrs or more
-% % beg = beg_master;                                                          % Reinitialize vectors of storms
-% % fin = fin_master;
-% % beg_del = [];                                                              % Empty vector to house values to be deleted
-% % fin_del = [];                                                              % Empty vector to house values to be deleted
-% % 
-% % for i = 1:length(beg)                                                      % For every value in events
-% %     if abs(beg(i) - fin(i)) < 48                                           % If the difference between beginning and end is less than 48
-% %         beg_del(end+1) = i;                                                % Grab indice to delete
-% %         fin_del(end+1) = i;                                                % Grab indice to delete
-% %     end
-% % end
-% % 
-% % beg(beg_del) = [];                                                         % Delete the cells that need to be deleted
-% % fin(fin_del) = [];                        
-% % 
-% % event48 = [beg, fin]; 
-% % 
-% % clear beg beg_del fin fin del i 
-% % 
-% % %% Refine By Direction of Wind
-% % 
-% % south_inds = find(wnddir(beg_master) >= south_wind(1)...                   % Find all the locations of south winds from the storms
-% %     & wnddir(beg_master) <= south_wind(2));
-% % 
-% % north_inds = find(wnddir(beg_master) <= north_wind(1)...                   % Find all the locations of north winds from the storms
-% %     | wnddir(beg_master) >= north_wind(2));
-% % 
-% % west_inds = find(wnddir(beg_master) >= west_wind(1)...                     % Find all the locations of west winds from the storms
-% %     & wnddir(beg_master) <= west_wind(2));
-% % 
-% % %---------Note-----------
-% % % The values for south_inds, north_inds and west_inds correspond to indice
-% % % values in beg_master, so to grab the true indicies, I will have to take
-% % % the values of beg_master of the north_inds for example.  This is done
-% % % below
-% % 
-% % south_inds = beg_master(south_inds);
-% % north_inds = beg_master(north_inds);
-% % west_inds = beg_master(west_inds);
-% % 
-% % % Now knowing all the locations of specific winds for every storm I will
-% % % add find which ones correspond to storms of specific lengths that I found
-% % % earlier.  
-% % 
-% % % Start with all events, this is basically done for me
-% % storm.all.south = south_inds;
-% % storm.all.north = north_inds;
-% % storm.all.west = west_inds;
-% % 
-% % % Now for 6 hour events
-% % tempS = ismember(south_inds, event6(1));
-% % tempN = ismember(north_inds, event6(1));
-% % tempW = ismember(north_inds, event6(1));
-
+figure
+%imagesc(10:10:360,yr1:1:yr2,log10(Z))
+imagesc(x1:xB2:360,y1:1:y2, Z)
+set(gca,'YDir','normal') % set to normal Y scale
+colorbar
+ylabel('Year')
+xlabel('Wind Direction [degrees]')
+title('Wind Direction Through Time')
 
 
 

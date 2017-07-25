@@ -558,8 +558,146 @@ Storm.north = find(Storm.wnddir <= 11.25 | Storm.wnddir > 270);
 Storm.south = find(Storm.wnddir > 90 & Storm.wnddir <= 191.25);
 
 
-%---------Recap-------------
-%So I've created two structures, one that has all of the storms 
+
+
+%% Code that works but is not useful right now
+% % %% Make a Master Structure
+% % storm = struct();
+% % 
+% % storm.all.events = events;                                                     % Every single event for that station
+% % 
+% % 
+% % %% Refine to grab events lasting 6 hrs or more
+% % beg = beg_master;                                                          % Reinitialize vectors of storms
+% % fin = fin_master;
+% % beg_del = [];                                                              % Empty vector to house values to be deleted
+% % fin_del = [];                                                              % Empty vector to house values to be deleted
+% % 
+% % for i = 1:length(beg)                                                      % For every value in events
+% %     if abs(beg(i) - fin(i)) < 6                                            % If the difference between beginning and end is less than 6
+% %         beg_del(end+1) = i;                                                % Grab indice to delete
+% %         fin_del(end+1) = i;                                                % Grab indice to delete
+% %     end
+% % end
+% % 
+% % beg(beg_del) = [];                                                         % Delete the cells that need to be deleted
+% % fin(fin_del) = [];                        
+% % 
+% % event6 = [beg, fin];                                                       % Create a 6 hour event variable
+% % 
+% % 
+% % %% Refine to grab events lasting 12 hrs or more
+% % beg = beg_master;                                                          % Reinitialize vectors of storms
+% % fin = fin_master;
+% % beg_del = [];                                                              % Empty vector to house values to be deleted
+% % fin_del = [];                                                              % Empty vector to house values to be deleted
+% % 
+% % for i = 1:length(beg)                                                      % For every value in events
+% %     if abs(beg(i) - fin(i)) < 12                                           % If the difference between beginning and end is less than 12
+% %         beg_del(end+1) = i;                                                % Grab indice to delete
+% %         fin_del(end+1) = i;                                                % Grab indice to delete
+% %     end
+% % end
+% % 
+% % beg(beg_del) = [];                                                         % Delete the cells that need to be deleted
+% % fin(fin_del) = [];                        
+% % 
+% % event12 = [beg, fin];                                                       % Create a 12 hour event variable
+% % 
+% % 
+% % %% Refine to grab events lasting 24 hrs or more
+% % beg = beg_master;                                                          % Reinitialize vectors of storms
+% % fin = fin_master;
+% % beg_del = [];                                                              % Empty vector to house values to be deleted
+% % fin_del = [];                                                              % Empty vector to house values to be deleted
+% % 
+% % for i = 1:length(beg)                                                      % For every value in events
+% %     if abs(beg(i) - fin(i)) < 24                                           % If the difference between beginning and end is less than 24
+% %         beg_del(end+1) = i;                                                % Grab indice to delete
+% %         fin_del(end+1) = i;                                                % Grab indice to delete
+% %     end
+% % end
+% % 
+% % beg(beg_del) = [];                                                         % Delete the cells that need to be deleted
+% % fin(fin_del) = [];                        
+% % 
+% % event24 = [beg, fin];     
+% % 
+% % %% Refine to grab events lasting 36 hrs or more
+% % beg = beg_master;                                                          % Reinitialize vectors of storms
+% % fin = fin_master;
+% % beg_del = [];                                                              % Empty vector to house values to be deleted
+% % fin_del = [];                                                              % Empty vector to house values to be deleted
+% % 
+% % for i = 1:length(beg)                                                      % For every value in events
+% %     if abs(beg(i) - fin(i)) < 36                                           % If the difference between beginning and end is less than 36
+% %         beg_del(end+1) = i;                                                % Grab indice to delete
+% %         fin_del(end+1) = i;                                                % Grab indice to delete
+% %     end
+% % end
+% % 
+% % beg(beg_del) = [];                                                         % Delete the cells that need to be deleted
+% % fin(fin_del) = [];                        
+% % 
+% % event36 = [beg, fin];     
+% % 
+% % %% Refine to grab events lasting 48 hrs or more
+% % beg = beg_master;                                                          % Reinitialize vectors of storms
+% % fin = fin_master;
+% % beg_del = [];                                                              % Empty vector to house values to be deleted
+% % fin_del = [];                                                              % Empty vector to house values to be deleted
+% % 
+% % for i = 1:length(beg)                                                      % For every value in events
+% %     if abs(beg(i) - fin(i)) < 48                                           % If the difference between beginning and end is less than 48
+% %         beg_del(end+1) = i;                                                % Grab indice to delete
+% %         fin_del(end+1) = i;                                                % Grab indice to delete
+% %     end
+% % end
+% % 
+% % beg(beg_del) = [];                                                         % Delete the cells that need to be deleted
+% % fin(fin_del) = [];                        
+% % 
+% % event48 = [beg, fin]; 
+% % 
+% % clear beg beg_del fin fin del i 
+% % 
+% % %% Refine By Direction of Wind
+% % 
+% % south_inds = find(wnddir(beg_master) >= south_wind(1)...                   % Find all the locations of south winds from the storms
+% %     & wnddir(beg_master) <= south_wind(2));
+% % 
+% % north_inds = find(wnddir(beg_master) <= north_wind(1)...                   % Find all the locations of north winds from the storms
+% %     | wnddir(beg_master) >= north_wind(2));
+% % 
+% % west_inds = find(wnddir(beg_master) >= west_wind(1)...                     % Find all the locations of west winds from the storms
+% %     & wnddir(beg_master) <= west_wind(2));
+% % 
+% % %---------Note-----------
+% % % The values for south_inds, north_inds and west_inds correspond to indice
+% % % values in beg_master, so to grab the true indicies, I will have to take
+% % % the values of beg_master of the north_inds for example.  This is done
+% % % below
+% % 
+% % south_inds = beg_master(south_inds);
+% % north_inds = beg_master(north_inds);
+% % west_inds = beg_master(west_inds);
+% % 
+% % % Now knowing all the locations of specific winds for every storm I will
+% % % add find which ones correspond to storms of specific lengths that I found
+% % % earlier.  
+% % 
+% % % Start with all events, this is basically done for me
+% % storm.all.south = south_inds;
+% % storm.all.north = north_inds;
+% % storm.all.west = west_inds;
+% % 
+% % % Now for 6 hour events
+% % tempS = ismember(south_inds, event6(1));
+% % tempN = ismember(north_inds, event6(1));
+% % tempW = ismember(north_inds, event6(1));
+
+
+
 
 
 
