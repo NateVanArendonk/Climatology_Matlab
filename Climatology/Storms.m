@@ -1,13 +1,19 @@
-clearvars
+
 
 %first load in the data
 %dir_nm = '/Users/andrewmcauliffe/Desktop/hourly_data/';
-dir_nm = '../../hourly_data/';                                                         % goes back 2 directories, to the desktop directory
-file_nm = 'whidbey_nas';                                   % you will have to change this variable for each station
-load_file = strcat(dir_nm,file_nm, '_hourly');
+% dir_nm = '../../hourly_data/';                                                         % goes back 2 directories, to the desktop directory
+% file_nm = 'whidbey_nas';                                   % you will have to change this variable for each station
+% load_file = strcat(dir_nm,file_nm, '_hourly');
+% load(load_file)
+% clear dir_nm file_nm load_file
+load_file = strcat(dir_nm,file_nm);
 load(load_file)
-clear dir_nm file_nm load_file
+
+
 wnddir = wnddir';
+
+
 
 %% Establish Search parameters 
 
@@ -298,6 +304,19 @@ ylabel('Average Wind Speed [m/s]')
 xlabel('Duration [hr]')
 title('Wind Duration vs Speed Threshold - Log Transform')
 
+% Save the Plot
+cd('../../Matlab_Figures/storms/heatMaps/avgDuration')
+
+outname = sprintf('avgSpeedvsDuration_%s',station_nm);
+hFig = gcf;
+hFig.PaperUnits = 'inches';
+hFig.PaperSize = [8.5 11];
+hFig.PaperPosition = [0 0 7 7];
+print(hFig,'-dpng','-r350',outname) %saves the figure, (figure, filetype, resolution, file name)
+close(hFig)
+
+%cd('../../../matlab/Climatology')
+
 % Calculate the event recurrence interval for wind speeds
 %---------Notes--------------
 % The above plot calculates the number of hits per year for a specific wind
@@ -336,6 +355,18 @@ title('Wind Duration vs Speed Threshold - Log Transform')
 % Calculate Event Recurrence for Max winds
 MaxEvent_RI = Z./yr_len;
 
+
+cd('../maxDuration')
+
+outname = sprintf('maxSpdvsDuration_%s',station_nm);
+hFig = gcf;
+hFig.PaperUnits = 'inches';
+hFig.PaperSize = [8.5 11];
+hFig.PaperPosition = [0 0 7 7];
+print(hFig,'-dpng','-r350',outname) %saves the figure, (figure, filetype, resolution, file name)
+close(hFig)
+
+
 %% Occurences by Year
 hits_vec = NaN(length(yr_vec), 1);
 hits12_vec = NaN(length(yr_vec), 1);
@@ -367,6 +398,17 @@ xlabel('Time [years]')
 ylabel('Number of Events')
 title('Events Lasting 12+ Hours')
 
+% Save plot
+cd('../../Events/FullTimeSeries')
+
+outname = sprintf('EventsPerYear_%s',station_nm);
+hFig = gcf;
+hFig.PaperUnits = 'inches';
+hFig.PaperSize = [8.5 11];
+hFig.PaperPosition = [0 0 7 7];
+print(hFig,'-dpng','-r350',outname) %saves the figure, (figure, filetype, resolution, file name)
+close(hFig)
+
 
 %% Make a plot of Number of Occurences per year
 
@@ -391,6 +433,16 @@ xlabel('Wind Speed [m/s]')
 ylabel('Number of Occurences')
 title('Total Number of Occurences')
 
+cd('../totalHits')
+
+outname = sprintf('TotalHits_%s',station_nm);
+hFig = gcf;
+hFig.PaperUnits = 'inches';
+hFig.PaperSize = [8.5 11];
+hFig.PaperPosition = [0 0 7 7];
+print(hFig,'-dpng','-r350',outname) %saves the figure, (figure, filetype, resolution, file name)
+close(hFig)
+
 %% Now for by year
 
 avg_vec = avg_vec./yr_len;                                                 % Divide number of occurences by year of record
@@ -404,58 +456,19 @@ xlabel('Wind Speed [m/s]')
 ylabel('Number of Occurences')
 title('Number of Occurences per Year')
 
+cd('../hitsPerYear')
+
+outname = sprintf('HitsPerYear_%s',station_nm);
+hFig = gcf;
+hFig.PaperUnits = 'inches';
+hFig.PaperSize = [8.5 11];
+hFig.PaperPosition = [0 0 7 7];
+print(hFig,'-dpng','-r350',outname) %saves the figure, (figure, filetype, resolution, file name)
+close(hFig)
+
+
 %% Direction through time heat map
 
-% Grab and create the variables that I want
-duration = blank(:,3);                                                     % Duration variable
-duration = cell2mat(duration); 
-
-avg_spd = blank(:,6);                                                      % Average Speed variable
-avg_spd = cell2mat(avg_spd);
-
-max_spd = blank(:,4);                                                      % Max Speed variable
-max_spd = cell2mat(max_spd);
-
-
-% First make the grid, I am going from 0:48 on the x-axis because I am going
-% to have 16 'bins' -> 0-3, 3-6, 6-9 etc. all the way to 48
-% For y-axis I am having 15 'bins' and looking at wind increments of 2 m/s
-% starting from zero all the way to 30.  
-
-[X,Y] = meshgrid(3:1:48,10:1:30);
-Z = zeros(size(X));
-
-for x = 1:length(X(1,:))                                                   % For every value in mesh of x-axis
-    dur = find(duration >= (X(1,x)));                                      % Find all the durations that exist longer than current threshold
-    for y = 1:length(X(:,1))                                               % For every value in mesh of y-axi                                  % Find all locations of durations longer than current threshold
-        spd = find(avg_spd(dur) >= Y(y,1));                                % Of those durations, find all winds that are larger than current threshold
-        if ~isempty(spd)
-            Z(y,x) = length(spd);
-        else
-            Z(y,x) = 0;
-        end
-    end
-end
-
-figure
-imagesc(3:1:48,10:1:30,log10(Z))
-set(gca,'YDir','normal') % set to normal Y scale
-colorbar
-ylabel('Average Wind Speed [m/s]')
-xlabel('Duration [hr]')
-title('Wind Duration vs Speed Threshold - Log Transform')
-
-% Calculate the event recurrence interval for wind speeds
-%---------Notes--------------
-% The above plot calculates the number of hits per year for a specific wind
-% speed at various durations.  Thus knowing the number of years on the
-% record, I can then take each number of counts and divide by the number of
-% years to find the yearly recurrence interval.  
-yr_vec = year(time(1)):year(time(end));
-yr_len = length(yr_vec);
-AvgEvent_RI = Z./yr_len;
-
-%% Color map for Max wind speeds 
 y1 = year(time(1));
 y2 = year(time(end));
 x1 = 10;
@@ -498,6 +511,16 @@ ylabel('Year')
 xlabel('Wind Direction [degrees]')
 title('Wind Direction Through Time')
 
+cd('../../heatMaps/dxdtFine')
+
+outname = sprintf('DirThruTimeHeatFINE_%s',station_nm);
+hFig = gcf;
+hFig.PaperUnits = 'inches';
+hFig.PaperSize = [8.5 11];
+hFig.PaperPosition = [0 0 7 7];
+print(hFig,'-dpng','-r350',outname) %saves the figure, (figure, filetype, resolution, file name)
+close(hFig)
+
 
 %%  Coarser Plot that doesn't show binning if present
 [X,Y] = meshgrid(x1:xB2:360,y1:1:y2);
@@ -535,5 +558,15 @@ ylabel('Year')
 xlabel('Wind Direction [degrees]')
 title('Wind Direction Through Time')
 
+cd('../dxdtCoarse')
 
+outname = sprintf('DirThruTimeHeatCOARSE_%s',station_nm);
+hFig = gcf;
+hFig.PaperUnits = 'inches';
+hFig.PaperSize = [8.5 11];
+hFig.PaperPosition = [0 0 7 7];
+print(hFig,'-dpng','-r350',outname) %saves the figure, (figure, filetype, resolution, file name)
+close(hFig)
+
+cd('../../../../matlab/Climatology')
 
