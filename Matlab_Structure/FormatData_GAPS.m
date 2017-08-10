@@ -1,30 +1,21 @@
-%% Script to convert data to correct format (units) for analysis
-
-% Note, this script should only be ran for data that is a full time series,
-% not one that needs to be combined. 
+function out = FormatData_GAPS(file_nm)
 
 
-%THIS SCRIPT RUNS convert_hourly script and ScalewindPowerLaw
-%clearvars
-% load the data
-% % % % dir_nm = '../../';
-% % % % file_loc = 'Downloaded Raw Data/';
-% % % % %file_nm = file_nm; 
-% % % % %station_name = 'William R Fairchild';
-% % % % load(strcat(dir_nm, file_loc, file_nm, '.mat'))
-% % % % clear dir_nm file_loc 
-% % % % %load('/Users/andrewmcauliffe/Desktop/Downloaded Raw Data/whidbey_nas.mat');
+% split up the file type from the file extension
+[path, name, ext] = fileparts(file_nm);
 
 
-load(strcat(file_nm, '.mat'))
+dir_loc = '../../Downloaded Raw Data';
 
-%% Variables that change every time, but need to be updated
+load(strcat(dir_loc,'/',file_nm))
+%% Script to convert data to correct format (units) without Interping over large distances
 
-% elevation = 87.8;
-% station_name = 'william_r_fairchild';
-% scaled_height = 10; 
-% surface_type = 'land';
-
+% clearvars
+% 
+% dir_loc = '../../Downloaded Raw Data';
+% file_nm = 'bham_airport';
+% 
+% load(strcat(dir_loc,'/',file_nm))
 
 %% Convert to correct format
 % This if else statement will see if the data is already in the correct
@@ -60,6 +51,7 @@ if ~isfield(station_data, 'usaf') % so if the data is not in the correct format,
     for i = 1:length(station_data.yr)
         station_data.dtnum(end+1) = datenum(station_data.yr(i), station_data.mo(i), station_data.da(i), station_data.hr(i), station_data.mn(i), 30);
     end
+    
 
 
     clear i j 
@@ -105,15 +97,16 @@ if ~isfield(station_data, 'usaf') % so if the data is not in the correct format,
     station_data.stp = station_data.stp';
 
     %% Run other scripts
-    convert_hourly;
+    gap_interp
+
     %scaleWindPowerLaw(station_data.wndspd, elevation, scaled_height, surface_type);
     clear ans elevation I nan_inds scaled_height station_data surface_type
 
     %% Save Data
-    outname = sprintf('%s_hourly',file_nm);
-    cd('../../hourly_data')
+    outname = sprintf('%s_hourly',name);
+    cd('../../hourly_data/gap_hourly')
     save(outname,'-struct','B');
-    cd('../matlab/Matlab_Structure')
+    cd('../../matlab/Matlab_Structure')
 
 else
      %% Unit conversion
@@ -132,30 +125,22 @@ else
 
 
     %% Transpose the data horizontally to vertical configuration 
-    station_data.usaf = station_data.usaf';
-    station_data.wban = station_data.wban';
-    station_data.yr = station_data.yr';
-    station_data.mo = station_data.mo';
-    station_data.da = station_data.da';
-    station_data.hr = station_data.hr';
-    station_data.mn = station_data.mn';
-    station_data.wnddir = station_data.wnddir';
-    station_data.wndspd = station_data.wndspd';
-    %station_data.wndmaxspd = station_data.wndmaxspd';
-    station_data.airtemp = station_data.airtemp';
-    station_data.dewp = station_data.dewp';
-    station_data.slp = station_data.slp';
-    station_data.alt = station_data.alt';
-    station_data.stp = station_data.stp';
+    station_data = station_data';
+    
 
     %% Run other scripts
-    convert_hourly;
+    gap_interp
+    
     %scaleWindPowerLaw(station_data.wndspd, elevation, scaled_height, surface_type);
     clear ans elevation I nan_inds scaled_height station_data surface_type
 
     %% Save Data
-    outname = sprintf('%s_hourly',file_nm);
-    cd('../../hourly_data')
+    outname = sprintf('%s_hourly',name);
+    cd('../../hourly_data/gap_hourly')
     save(outname,'-struct','B');
-    cd('../matlab/Matlab_Structure')
+    cd('../../matlab/Matlab_Structure')
 end
+end
+
+
+

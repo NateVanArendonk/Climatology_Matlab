@@ -1,7 +1,7 @@
 %clear 
 clf
 %% Sort by date
-%load('/Users/andrewmcauliffe/Desktop/Downloaded Raw Data/whidbey.mat');
+load('/Users/andrewmcauliffe/Desktop/Downloaded Raw Data/whidbey_nas.mat');
 [~, I] = sort(station_data.time,'ascend');
 %sort the time vector in ascending order from oldest date to current data
 station_data.time = station_data.time(I);
