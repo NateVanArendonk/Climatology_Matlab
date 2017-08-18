@@ -11,7 +11,7 @@ clearvars
 
 
 % Import the Data
-xyz = ascii2xyz('pnw_dem/nw_pacific_crm_v1.asc');
+xyz = ascii2xyz('../../Matlab_Random/DEM/nw_pacific_crm_v1.asc');
 
 
 my_zone = '4269'; %? 
@@ -85,11 +85,12 @@ figure
 pcolor(Lon,Lat,Z)
 shading flat
 hold on
-contour(Lon,Lat,Z,[0 0],'k')
+contour(Lon,Lat,Z,[0 0],'k')  % [0 0] means a single contour at the same level
+% 'k' could be a color?
 colorbar
-%caxis([-100 0])
-%colormap(bone)
-%colormap(demcmap(Z,1000)) % Don't Have mapping toolbox
+caxis([-100 0])
+colormap(bone)
+colormap(demcmap(Z,1000)) 
 
 %% Transform to UTM
 
@@ -103,9 +104,9 @@ shading flat
 hold on
 contour(x_utm,y_utm,Z,[0 0],'k')
 colorbar
-%caxis([-100 0])
-%colormap(bone)
-%colormap(demcmap(Z,1000))  % Don't have Mapping Toolbox
+caxis([-100 0])
+colormap(bone)
+colormap(demcmap(Z,1000))  
 % This makes the land and ocean look pretty, get from Sean when needed
 
 
@@ -133,7 +134,7 @@ figure
 pcolor(myX,myY,myZ)
 shading flat
 hold on
-contour(myX,myY,myZ,[0 0],'k')
+contour(myX,myY,myZ,[0 0],'k')  
 
 %%
 test = myZ;
@@ -145,14 +146,14 @@ shading flat
 hold on
 contour(myX,myY,myZ,[0 0],'k')
 colorbar
-%caxis([-100 0])
-%colormap(bone)
-%colormap(demcmap(test,1000))
+caxis([-100 0])
+colormap(bone)
+colormap(demcmap(test,1000))
 
 %% Make D3D grid
 % Answer Y to negate points (D3D expects depth, not elevtation)
 % Answer 9 to extend
-addpath 'C:\openearthtools\matlab\applications\delft3d_matlab'
+addpath '/OET/openearthtools/matlab/applications/delft3d_matlab'
 
 proj_name = 'salish_500m';
 
