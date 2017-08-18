@@ -18,7 +18,7 @@ clearvars
 dir_nm = '../../hourly_data/';
 %dir_nm = '/Users/andrewmcauliffe/Desktop/hourly_data/';
 station_name = 'Van Airport';
-station_nm = 'van_airport';
+station_nm = 'van_arpt';
 %file_nm = 'whidbey_nas_hourly'; % you will have to change this variable for each station
 load_file = strcat(dir_nm,station_nm, '_hourly');
 load(load_file)

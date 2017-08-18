@@ -1,9 +1,9 @@
 %% Code to create a wind rose diagram from hourly time series data
 clearvars
 
-file_nm = 'bham_airport_hourly.mat'; % change this to the location of interest
-file_loc = '../../hourly_data/gap_hourly/';
-file_load = strcat(file_loc, file_nm);
+file_nm = 'port_townsend'; % change this to the location of interest
+file_loc = '../../hourly_data/';
+file_load = strcat(file_loc, file_nm,'_hourly');
 
 %load in the data
 load(file_load)
@@ -12,7 +12,7 @@ clear stn_nm file_loc file_load
 
 %% Plot the Wind Rose
 data_type = 'NDBC';
-station_nm = 'Bham_Airport';  %Change this depending on station
+station_nm = 'Port Townsend';  %Change this depending on station
 options.nDirections = 36;  % most stations show sub-5 degree binning
 %sta_num = [1 2 3 4 5];
 options.vWinds = [0 5 10 15 20 25]; %Specify the wind speeds that you want to appear on the windrose
