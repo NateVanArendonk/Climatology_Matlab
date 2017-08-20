@@ -5,52 +5,61 @@ clearvars
 %first load in the data
 dir_nm = '../../hourly_data/';
 %dir_nm = '../../COOPS_tides/';
-station_name = 'Cherry Point';
-station_nm = 'cherry_point';
-
-load_file = strcat(dir_nm,station_nm,'/',station_nm,'_hourly');
+station_name = 'Sentry Shoal';
+station_nm = 'sentry_shoal';
+%COOPS LOAD
+%load_file = strcat(dir_nm,station_nm,'/',station_nm,'_slp');
+%NCDC LOAD
+load_file = strcat(dir_nm,station_nm,'_hourly');
 load(load_file)
 clear dir_nm file_nm load_file
 
 
 %% Find yearly min
-yr_vec = year(slp.time(1)):year(slp.time(end)); %make a year vec, -10 because of NaNs
-minima = NaN(length(yr_vec),1); %create vector to house all of the block maxima
+%COOPS
+%yr_vec = year(slp.time(1)):year(slp.time(end)); %make a year vec, -10 because of NaNs
+
+%NCDC
+yr_vec = year(time(1)):year(time(end));
+
+maxima = NaN(length(yr_vec),1); %create vector to house all of the block maxima
 for i = 1:length(yr_vec)
-    yr_ind = find(year(slp.time) == yr_vec(i));
+    %COOPS
+    %yr_ind = find(year(slp.time) == yr_vec(i));
+    
+    %NCDC
+    yr_ind = find(year(time) == yr_vec(i));
+    
     % If there is more than 50% of the hours missing for that year, I will
     % skip it
     if length(yr_ind) < 8760 * .5
-        minima(i) = NaN;
+        maxima(i) = NaN;
     else
     %max_val = max(wndspd(yr_ind));
-        minima(i) = min(slp.BP(yr_ind));
+        %COOPS
+        %minima(i) = min(slp.BP(yr_ind));
+        
+        %NCDC
+        maxima(i) = max(waveheight(yr_ind));
     end
 end
 
 
 
-nan_ind = isnan(minima) ; % Find any nans and get rid of them
-minima(nan_ind) = [];
-
-low_del = find(minima < 900);
-minima(low_del) = [];
-% Max pressure values negative because I am concerned with minimum not
-% maximum values
-minima = -(minima);
-
+nan_ind = isnan(maxima) ; % Find any nans and get rid of them
+maxima(nan_ind) = [];
 
 % Get GEV statistics about the data
-[paramEsts, paramCIs] = gevfit(minima);
+[paramEsts, paramCIs] = gevfit(maxima);
 %----------------Results from GEV-------------------------------
 % % % kMLE = paramEsts(1);        % Shape parameter
 % % % sigmaMLE = paramEsts(2);    % Scale parameter
 % % % muMLE = paramEsts(3);       % Location parameter
 %% Plot the GEV
 clf
-x = minima; 
-xmax = max(x)+10;
-lowerBnd = min(x) - 10;
+x = maxima; 
+xmax = max(x)*1.1;
+lowerBnd = 2;
 bins = floor(lowerBnd):ceil(xmax);
 
 
@@ -66,11 +75,11 @@ title(plot_tit)
 
 ax = gca;  % Play with the Axes 
 ax.XLim = [lowerBnd xmax];
-ax.YLim = [0 .12];
+
 
 % Add GEV parameters to the plot
 tbox = sprintf('mu = %4.2f \nsigma = %4.2f \nk = %4.2f \nn: %d',...
-    paramEsts(1),paramEsts(2),paramEsts(3), length(minima));
+    paramEsts(1),paramEsts(2),paramEsts(3), length(maxima));
 %text(10,0.25, tbox)
 
 % Add box around the text
@@ -85,7 +94,7 @@ ylabel('Probability Density')
 box on
 
 % Calculate the CDF - CDF will give me the probability of values 
-cdf = (1-gevcdf(xgrid,paramEsts(1),paramEsts(2),paramEsts(3))); % create CDF from GEV PDF
+cdf = gevcdf(xgrid,paramEsts(1),paramEsts(2),paramEsts(3)); % create CDF from GEV PDF
 
 
 % ----------Notes-----------
@@ -101,12 +110,6 @@ cdf = (1-gevcdf(xgrid,paramEsts(1),paramEsts(2),paramEsts(3))); % create CDF fro
 
 
 RI = 1./cdf;
-
-
-
-xgrid = xgrid * -1;
-
-
 subplot(2,2,[2 4])
 plot(xgrid, RI)
 ylim([0 100])

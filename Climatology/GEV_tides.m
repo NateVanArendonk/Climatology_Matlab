@@ -5,8 +5,8 @@ clearvars
 %first load in the data
 %dir_nm = '../../hourly_data/';
 dir_nm = '../../COOPS_tides/';
-station_name = 'Tacoma';
-station_nm = 'tacoma';
+station_name = 'La Push';
+station_nm = 'la_push';
 
 load_file = strcat(dir_nm,station_nm,'/',station_nm,'_6minV');
 load(load_file)
@@ -73,7 +73,7 @@ annotation('textbox',dim,'String',tbox,'FitBoxToText','on');
 
 
 
-xlabel('Max Hourly Wind Speed Obs [m/s]')
+xlabel('Water Level [m]')
 ylabel('Probability Density')
 %legend('Hourly','Six-Hr Avg.','Location','NorthEast')
 box on
@@ -99,7 +99,7 @@ plot(xgrid, RI)
 ylim([0 100])
 plot_tit = sprintf('Recurrence Interval - %s', station_name);
 title(plot_tit)
-xlabel('Wind Speed [m/s]')
+xlabel('Water Level [m]')
 ylabel('Time [years]')
 
 
@@ -120,7 +120,7 @@ R5MLE = gevinv(1-1./5,paramEsts(1),paramEsts(2),paramEsts(3));
 R2MLE = gevinv(1-1./2,paramEsts(1),paramEsts(2),paramEsts(3));
 
 % Add GEV parameters to the plot
-tbox = sprintf('100 yr: %4.2f m/s\n50 yr: %4.2f m/s\n25 yr: %4.2f m/s\n10 yr: %4.2f m/s\n5 yr: %4.2f m/s\n2 yr: %4.2f m/s'...
+tbox = sprintf('100 yr: %4.2f m\n50 yr: %4.2f m\n25 yr: %4.2f m\n10 yr: %4.2f m\n5 yr: %4.2f m\n2 yr: %4.2f m'...
     ,R100MLE, R50MLE, R25MLE, R10MLE, R5MLE, R2MLE);
 %text(6,60, tbox)
 

@@ -4,41 +4,57 @@ clearvars
 
 %first load in the data
 dir_nm = '../../hourly_data/';
-%dir_nm = '../../Downloaded Raw Data/';
-station_name = 'Whidbey';
-station_nm = 'whidbey_nas';
-load_file = strcat(dir_nm,station_nm, '_hourly');
+%dir_nm = '../../COOPS_tides/';
+station_name = 'Sentry Shoal';
+station_nm = 'sentry_shoal';
+%COOPS LOAD
+%load_file = strcat(dir_nm,station_nm,'/',station_nm,'_slp');
+%NCDC LOAD
+load_file = strcat(dir_nm,station_nm,'_hourly');
 load(load_file)
 clear dir_nm file_nm load_file
-%wnddir = wnddir';
 
-% for NDBC data get rid of 'hourly' in load_file 
-% Also add the following line after wnddir = wndir';
-            % wndspd = wndspd_obs;
-            
 
 %% Find yearly min
-yr_vec = year(time(2)):year(time(end-100)); %make a year vec, -10 because of NaNs
+%COOPS
+%yr_vec = year(slp.time(1)):year(slp.time(end)); %make a year vec, -10 because of NaNs
+
+%NCDC
+yr_vec = year(time(1)):year(time(end));
+
 minima = NaN(length(yr_vec),1); %create vector to house all of the block maxima
 for i = 1:length(yr_vec)
+    %COOPS
+    %yr_ind = find(year(slp.time) == yr_vec(i));
+    
+    %NCDC
     yr_ind = find(year(time) == yr_vec(i));
+    
     % If there is more than 50% of the hours missing for that year, I will
     % skip it
     if length(yr_ind) < 8760 * .5
         minima(i) = NaN;
     else
     %max_val = max(wndspd(yr_ind));
+        %COOPS
+        %minima(i) = min(slp.BP(yr_ind));
+        
+        %NCDC
         minima(i) = min(slp(yr_ind));
     end
 end
 
-nan_ind = isnan(minima); % Find any nans and get rid of them
+
+
+nan_ind = isnan(minima) ; % Find any nans and get rid of them
 minima(nan_ind) = [];
 
+low_del = find(minima < 900);
+minima(low_del) = [];
 % Max pressure values negative because I am concerned with minimum not
 % maximum values
 minima = -(minima);
-clear j yr_ind
+
 
 % Get GEV statistics about the data
 [paramEsts, paramCIs] = gevfit(minima);
@@ -53,6 +69,7 @@ xmax = max(x)+10;
 lowerBnd = min(x) - 10;
 bins = floor(lowerBnd):ceil(xmax);
 
+
 % plot the hist with GEV line
 subplot(2,2,[1 3])
 h = bar(bins,histc(x,bins)/length(x),'histc');
@@ -66,24 +83,25 @@ title(plot_tit)
 ax = gca;  % Play with the Axes 
 ax.XLim = [lowerBnd xmax];
 
+
 % Add GEV parameters to the plot
 tbox = sprintf('mu = %4.2f \nsigma = %4.2f \nk = %4.2f \nn: %d',...
     paramEsts(1),paramEsts(2),paramEsts(3), length(minima));
 %text(10,0.25, tbox)
 
 % Add box around the text
-dim = [.28 .35 .3 .3];
+dim = [.14 .60 .3 .3];
 annotation('textbox',dim,'String',tbox,'FitBoxToText','on');
 
 
 
-xlabel('Minimum Sea Level Pressure [mb]')
+xlabel('Sea Level Pressure [mb]')
 ylabel('Probability Density')
 %legend('Hourly','Six-Hr Avg.','Location','NorthEast')
 box on
 
 % Calculate the CDF - CDF will give me the probability of values 
-cdf = gevcdf(xgrid,paramEsts(1),paramEsts(2),paramEsts(3)); % create CDF from GEV PDF
+cdf = (1-gevcdf(xgrid,paramEsts(1),paramEsts(2),paramEsts(3))); % create CDF from GEV PDF
 
 
 % ----------Notes-----------
@@ -99,13 +117,18 @@ cdf = gevcdf(xgrid,paramEsts(1),paramEsts(2),paramEsts(3)); % create CDF from GE
 
 
 RI = 1./cdf;
-RI = fliplr(RI);
+
+
+
+xgrid = xgrid * -1;
+
+
 subplot(2,2,[2 4])
 plot(xgrid, RI)
 ylim([0 100])
 plot_tit = sprintf('Recurrence Interval - %s', station_name);
 title(plot_tit)
-xlabel('Wind Speed [m/s]')
+xlabel('Sea Level Pressure [mb]')
 ylabel('Time [years]')
 
 
@@ -126,16 +149,16 @@ R5MLE = gevinv(1-1./5,paramEsts(1),paramEsts(2),paramEsts(3)) * -1;
 R2MLE = gevinv(1-1./2,paramEsts(1),paramEsts(2),paramEsts(3)) * -1;
 
 % Add GEV parameters to the plot
-tbox = sprintf('100 yr: %4.2f m/s\n50 yr: %4.2f m/s\n25 yr: %4.2f m/s\n10 yr: %4.2f m/s\n5 yr: %4.2f m/s\n2 yr: %4.2f m/s'...
+tbox = sprintf('100 yr: %4.2f mb\n50 yr: %4.2f mb\n25 yr: %4.2f mb\n10 yr: %4.2f mb\n5 yr: %4.2f mb\n2 yr: %4.2f mb'...
     ,R100MLE, R50MLE, R25MLE, R10MLE, R5MLE, R2MLE);
 %text(6,60, tbox)
 
-dim = [.62 .3 .3 .3];
+dim = [.68 .3 .3 .3];
 annotation('textbox',dim,'String',tbox,'FitBoxToText','on');
 
 %%
 % Save the Plot
-cd('../../Matlab_Figures/GEV/Updated')
+cd('../../Matlab_Figures/GEV/slp')
 
 outname = sprintf('GEV_%s',station_nm);
 hFig = gcf;
