@@ -7,10 +7,10 @@
 
 
 %first load in the data
-%dir_nm = '../../hourly_data/';
+dir_nm = '../../hourly_data/';
 %dir_nm = '/Users/andrewmcauliffe/Desktop/hourly_data/';
-%file_nm = 'obs_angeles'; % you will have to change this variable for each station
-load_file = strcat(dir_nm,file_nm);
+file_nm = 'seatac'; % you will have to change this variable for each station
+load_file = strcat(dir_nm,file_nm,'_hourly');
 load(load_file)
 %clear dir_nm file_nm load_file
 wnddir = wnddir';
@@ -185,12 +185,12 @@ close(hFig)
 boxplot(slp, mo_str)
 title('Pressure by Month')
 xlabel('Month')
-ylabel('Pressure (millibars')
+ylabel('Pressure (millibars)')
 
-cd('../pressure')
+cd('../../Matlab_Figures/Distributions/box_plots/pressure')
 
 %Save the figure
-outname = sprintf('PressureByMonth_%s',station_nm);
+outname = sprintf('PressureByMonth_%s',file_nm);
 hFig = gcf;
 hFig.PaperUnits = 'inches';
 hFig.PaperSize = [8.5 11];
@@ -199,6 +199,8 @@ hFig.PaperPosition = [0 0 7 7];
 print(hFig,'-dpng','-r350',outname) %saves the figure, (figure, filetype, resolution, file name)
 close(hFig)
 
+
+cd('../../../../matlab/Climatology')
 
 
 

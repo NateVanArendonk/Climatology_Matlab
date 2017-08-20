@@ -5,8 +5,8 @@ clearvars
 %first load in the data
 dir_nm = '../../hourly_data/';
 %dir_nm = '/Users/andrewmcauliffe/Desktop/hourly_data/';
-station_name = 'Discovery Island';
-station_nm = 'discovery_island';
+station_name = 'SeaTac';
+station_nm = 'seatac';
 %file_nm = 'whidbey_nas_hourly'; % you will have to change this variable for each station
 load_file = strcat(dir_nm,station_nm, '_hourly');
 load(load_file)
@@ -77,14 +77,14 @@ plot_tit = sprintf('GEV - PDF - %s', station_name);
 title(plot_tit)
 
 ax = gca;  % Play with the Axes 
-ax.XLim = [8 xmax];
+ax.XLim = [8 xmax*1.1];
 % Add GEV parameters to the plot
 tbox = sprintf('mu = %4.2f \nsigma = %4.2f \nk = %4.2f \nn: %d',...
     paramEsts(1),paramEsts(2),paramEsts(3), length(maxima));
 %text(12,0.15, tbox)
 
 % Add box around the text
-dim = [.31 .5 .3 .3];
+dim = [.29 .5 .3 .3];
 annotation('textbox',dim,'String',tbox,'FitBoxToText','on');
 
 

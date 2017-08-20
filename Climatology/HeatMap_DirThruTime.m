@@ -1,7 +1,7 @@
 %% Load in Data
 clearvars
 dir_nm = '../../hourly_data/gap_hourly/';                                                     
-file_nm = 'bremerton_arpt';                                   
+file_nm = 'whidbey_nas';                                   
 load_file = strcat(dir_nm,file_nm, '_hourly');
 load(load_file)
 clear dir_nm load_file
@@ -19,6 +19,7 @@ xB2 = 20;  % Use this to plot coarser winds to show change thru time
 Z = zeros(size(X));   % make empty grid
 Z2 = zeros(size(X)); % Grid that will highlight heavy points
 B = zeros(size(X)); % pdf grid
+Zspd = zeros(size(X)); 
 
 for y = 1:length(Y(:,1))                                                   % For every value in Y
     yr_ind = find(year(time) == Y(y));                                     % Find that current year
@@ -30,6 +31,8 @@ for y = 1:length(Y(:,1))                                                   % For
                     Z(y,x) = 0;                                                % Set it equal to zero
                 else
                     Z(y,x) = length(dir_ind);                                  % Otherwise populate Z with length of hits
+                    s_i = find(wndspd(dir_ind) > 10);
+                    Zspd(x,y) = length(s_i);
                     if Z(y,x) > 500
                         Z2(y,x) = Z(y,x);
                     else
@@ -42,6 +45,8 @@ for y = 1:length(Y(:,1))                                                   % For
                     Z(y,x) = 0;
                 else
                     Z(y,x) = length(dir_ind);
+                    s_i = find(wndspd(dir_ind) > 10);
+                    Zspd(x,y) = length(s_i);
                     if Z(y,x) > 500
                         Z2(y,x) = Z(y,x);
                     else
@@ -83,7 +88,7 @@ end
 
 figure
 %imagesc(10:10:360,yr1:1:yr2,log10(Z))
-imagesc(x1:x1:360,y1:1:y2, Z)
+imagesc(x1:x1:360,y1:1:y2, Zspd)
 set(gca,'YDir','normal') % set to normal Y scale
 colorbar
 ylabel('Year')
