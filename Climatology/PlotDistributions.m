@@ -7,9 +7,9 @@
 
 
 %first load in the data
-dir_nm = '../../hourly_data/';
+dir_nm = '../../hourly_data/gap_hourly/';
 %dir_nm = '/Users/andrewmcauliffe/Desktop/hourly_data/';
-file_nm = 'seatac'; % you will have to change this variable for each station
+file_nm = 'bham_airport'; % you will have to change this variable for each station
 load_file = strcat(dir_nm,file_nm,'_hourly');
 load(load_file)
 %clear dir_nm file_nm load_file

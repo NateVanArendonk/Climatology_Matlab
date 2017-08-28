@@ -7,11 +7,11 @@
 % % clearvars
 % % 
 % % %first load in the data
-% % dir_nm = '../../hourly_data/';
+dir_nm = '../../hourly_data/gap_hourly/';
 % % %dir_nm = '/Users/andrewmcauliffe/Desktop/hourly_data/';
-% % file_nm = 'whidbey_hourly'; % you will have to change this variable for each station
-% % load_file = strcat(dir_nm,file_nm);
-% % load(load_file)
+file_nm = 'whidbey_nas_hourly'; % you will have to change this variable for each station
+load_file = strcat(dir_nm,file_nm);
+load(load_file)
 % % clear dir_nm file_nm load_file
 % % wnddir = wnddir';
 
@@ -308,6 +308,9 @@ for i = 1:length(wndspd)
     mo_str(i) = month(time(i));
 end
 
+%mo_vec = NaN(1,length(slp));
+%mo_vec = mat2cell(mo_vec, length(slp));
+
 for i = 1:length(mo_str)
     if mo_str(i) == "1"
         mo_str(i) = "Jan";
@@ -335,6 +338,38 @@ for i = 1:length(mo_str)
         mo_str(i) = "Dec";
     end
 end
+
+
+% % % for i = 1:length(mo_str)
+% % %     if mo_str(i) == "1"
+% % %         mo_vec(i) = 'Jan';
+% % %     elseif mo_str(i) == "2"
+% % %         mo_vec(i) = 'Feb';
+% % %     elseif mo_str(i) == "3"
+% % %         mo_vec(i) = 'Mar';
+% % %     elseif mo_str(i) == "4"
+% % %         mo_vec(i) = 'Apr';
+% % %     elseif mo_str(i) == "5"
+% % %         mo_vec(i) = 'May';
+% % %     elseif mo_str(i) == "6"
+% % %         mo_vec(i) = 'Jun';
+% % %     elseif mo_str(i) == "7" 
+% % %         mo_vec(i) = 'Jul';
+% % %     elseif mo_str(i) == "8"
+% % %         mo_vec(i) = 'Aug';
+% % %     elseif mo_str(i) == "9" 
+% % %         mo_vec(i) = 'Sept';
+% % %     elseif mo_str(i) == "10"
+% % %         mo_vec(i) = 'Oct';
+% % %     elseif mo_str(i) == "11"
+% % %         mo_vec(i) = 'Nov';
+% % %     elseif mo_str(i) == "12"
+% % %         mo_vec(i) = 'Dec';
+% % %     end
+% % % end
+
+
+
 % Convert string into character array
 mo_str = char(mo_str);
 

@@ -3,32 +3,32 @@
 clearvars
 
 %first load in the data
-dir_nm = '../../hourly_data/';
-%dir_nm = '../../COOPS_tides/';
-station_name = 'Sentry Shoal';
-station_nm = 'sentry_shoal';
+%dir_nm = '../../hourly_data/';
+dir_nm = '../../COOPS_tides/';
+station_name = 'Cherry Point';
+station_nm = 'cherry_point';
 %COOPS LOAD
-%load_file = strcat(dir_nm,station_nm,'/',station_nm,'_slp');
+load_file = strcat(dir_nm,station_nm,'/',station_nm,'_slp');
 %NCDC LOAD
-load_file = strcat(dir_nm,station_nm,'_hourly');
+%load_file = strcat(dir_nm,station_nm,'_hourly');
 load(load_file)
 clear dir_nm file_nm load_file
 
 
 %% Find yearly min
 %COOPS
-%yr_vec = year(slp.time(1)):year(slp.time(end)); %make a year vec, -10 because of NaNs
+yr_vec = year(slp.time(1)):year(slp.time(end)); %make a year vec, -10 because of NaNs
 
 %NCDC
-yr_vec = year(time(1)):year(time(end));
+%yr_vec = year(time(1)):year(time(end));
 
 minima = NaN(length(yr_vec),1); %create vector to house all of the block maxima
 for i = 1:length(yr_vec)
     %COOPS
-    %yr_ind = find(year(slp.time) == yr_vec(i));
+    yr_ind = find(year(slp.time) == yr_vec(i));
     
     %NCDC
-    yr_ind = find(year(time) == yr_vec(i));
+    %yr_ind = find(year(time) == yr_vec(i));
     
     % If there is more than 50% of the hours missing for that year, I will
     % skip it
@@ -37,10 +37,10 @@ for i = 1:length(yr_vec)
     else
     %max_val = max(wndspd(yr_ind));
         %COOPS
-        %minima(i) = min(slp.BP(yr_ind));
+        minima(i) = min(slp.BP(yr_ind));
         
         %NCDC
-        minima(i) = min(slp(yr_ind));
+        %minima(i) = min(slp(yr_ind));
     end
 end
 

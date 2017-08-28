@@ -83,3 +83,19 @@ elseif length(nan_inds.slp) == length(station_data.slp)
     B.slp = 0;
 end
 
+%%  Find NaNs in Temperature and Remove them
+
+station_data.time = station_data.time_copy;
+nan_inds.airtemp = find(isnan(station_data.airtemp));
+
+if length(nan_inds.airtemp) ~= length(station_data.airtemp) 
+    station_data.airtemp(nan_inds.airtemp) = [];
+    station_data.time(nan_inds.airtemp) = [];
+%find indicies of unique values for Interp
+    [~, II] = unique(station_data.time);
+    B.airtemp = interpShortGap(station_data.time(II), station_data.airtemp(II), B.time, hr_thresh);
+    clear II
+elseif length(nan_inds.airtemp) == length(station_data.airtemp)
+    fprintf('No Values for Temperature')
+    B.airtemp = 0;
+end

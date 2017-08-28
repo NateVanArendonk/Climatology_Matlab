@@ -1,17 +1,18 @@
-
+clearvars
 
 %first load in the data
 % dir_nm = '/Users/andrewmcauliffe/Desktop/hourly_data/';
-% dir_nm = '../../hourly_data/';                                                         % goes back 2 directories, to the desktop directory
-% file_nm = 'whidbey_nas';                                   % you will have to change this variable for each station
-% load_file = strcat(dir_nm,file_nm, '_hourly');
-% load(load_file)
+dir_nm = '../../hourly_data/';                                                         % goes back 2 directories, to the desktop directory
+station_nm = 'whidbey_nas';
+file_nm = 'whidbey_nas';                                   % you will have to change this variable for each station
+load_file = strcat(dir_nm,file_nm, '_hourly');
+load(load_file)
 % clear dir_nm file_nm load_file
 
 
-% If runnining multiple
-load_file = strcat(dir_nm,file_nm);
-load(load_file)
+% % If runnining multiple
+% load_file = strcat(dir_nm,file_nm);
+% load(load_file)
 
 
 wnddir = wnddir';
@@ -267,8 +268,8 @@ blank = storm;                                                             % bla
 storm = [header; storm];      
 
 %% Make a Color Map of duration vs speed
-
-% Grab and create the variables that I want
+% % % 
+%Grab and create the variables that I want
 duration = blank(:,3);                                                     % Duration variable
 duration = cell2mat(duration); 
 
@@ -277,58 +278,58 @@ avg_spd = cell2mat(avg_spd);
 
 max_spd = blank(:,4);                                                      % Max Speed variable
 max_spd = cell2mat(max_spd);
-
-
-% First make the grid, I am going from 0:48 on the x-axis because I am going
-% to have 16 'bins' -> 0-3, 3-6, 6-9 etc. all the way to 48
-% For y-axis I am having 15 'bins' and looking at wind increments of 2 m/s
-% starting from zero all the way to 30.  
-
-[X,Y] = meshgrid(3:1:48,10:1:30);
-Z = zeros(size(X));
-
-for x = 1:length(X(1,:))                                                   % For every value in mesh of x-axis
-    dur = find(duration >= (X(1,x)));                                      % Find all the durations that exist longer than current threshold
-    for y = 1:length(X(:,1))                                               % For every value in mesh of y-axi                                  % Find all locations of durations longer than current threshold
-        spd = find(avg_spd(dur) >= Y(y,1));                                % Of those durations, find all winds that are larger than current threshold
-        if ~isempty(spd)
-            Z(y,x) = length(spd);
-        else
-            Z(y,x) = 0;
-        end
-    end
-end
-
-figure
-imagesc(3:1:48,10:1:30,log10(Z))
-set(gca,'YDir','normal') % set to normal Y scale
-colorbar
-ylabel('Average Wind Speed [m/s]')
-xlabel('Duration [hr]')
-title('Wind Duration vs Speed Threshold - Log Transform')
-
-% Save the Plot
-cd('../../Matlab_Figures/storms/heatMaps/avgDuration')
-
-outname = sprintf('avgSpeedvsDuration_%s',station_nm);
-hFig = gcf;
-hFig.PaperUnits = 'inches';
-hFig.PaperSize = [8.5 11];
-hFig.PaperPosition = [0 0 7 7];
-print(hFig,'-dpng','-r350',outname) %saves the figure, (figure, filetype, resolution, file name)
-close(hFig)
-
-%cd('../../../matlab/Climatology')
-
-% Calculate the event recurrence interval for wind speeds
-%---------Notes--------------
-% The above plot calculates the number of hits per year for a specific wind
-% speed at various durations.  Thus knowing the number of years on the
-% record, I can then take each number of counts and divide by the number of
-% years to find the yearly recurrence interval.  
+% % % 
+% % % 
+% % % % First make the grid, I am going from 0:48 on the x-axis because I am going
+% % % % to have 16 'bins' -> 0-3, 3-6, 6-9 etc. all the way to 48
+% % % % For y-axis I am having 15 'bins' and looking at wind increments of 2 m/s
+% % % % starting from zero all the way to 30.  
+% % % 
+% % % [X,Y] = meshgrid(3:1:48,10:1:30);
+% % % Z = zeros(size(X));
+% % % 
+% % % for x = 1:length(X(1,:))                                                   % For every value in mesh of x-axis
+% % %     dur = find(duration >= (X(1,x)));                                      % Find all the durations that exist longer than current threshold
+% % %     for y = 1:length(X(:,1))                                               % For every value in mesh of y-axi                                  % Find all locations of durations longer than current threshold
+% % %         spd = find(avg_spd(dur) >= Y(y,1));                                % Of those durations, find all winds that are larger than current threshold
+% % %         if ~isempty(spd)
+% % %             Z(y,x) = length(spd);
+% % %         else
+% % %             Z(y,x) = 0;
+% % %         end
+% % %     end
+% % % end
+% % % 
+% % % figure
+% % % imagesc(3:1:48,10:1:30,log10(Z))
+% % % set(gca,'YDir','normal') % set to normal Y scale
+% % % colorbar
+% % % ylabel('Average Wind Speed [m/s]')
+% % % xlabel('Duration [hr]')
+% % % title('Wind Duration vs Speed Threshold - Log Transform')
+% % % 
+% % % % Save the Plot
+% % % cd('../../Matlab_Figures/storms/heatMaps/avgDuration')
+% % % 
+% % % outname = sprintf('avgSpeedvsDuration_%s',station_nm);
+% % % hFig = gcf;
+% % % hFig.PaperUnits = 'inches';
+% % % hFig.PaperSize = [8.5 11];
+% % % hFig.PaperPosition = [0 0 7 7];
+% % % print(hFig,'-dpng','-r350',outname) %saves the figure, (figure, filetype, resolution, file name)
+% % % close(hFig)
+% % % 
+% % % %cd('../../../matlab/Climatology')
+% % % 
+% % % % Calculate the event recurrence interval for wind speeds
+% % % %---------Notes--------------
+% % % % The above plot calculates the number of hits per year for a specific wind
+% % % % speed at various durations.  Thus knowing the number of years on the
+% % % % record, I can then take each number of counts and divide by the number of
+% % % % years to find the yearly recurrence interval.  
 yr_vec = year(time(1)):year(time(end));
 yr_len = length(yr_vec);
-AvgEvent_RI = Z./yr_len;
+%AvgEvent_RI = Z./yr_len;
 
 %% Color map for Max wind speeds 
 
@@ -347,19 +348,29 @@ for x = 1:length(X(1,:))                                                   % For
     end
 end
 
-figure
-imagesc(3:1:48,10:1:30,log10(Z))
+% Normalize to number of years
+Z = Z./yr_len;
+
+%%
+%figure
+%imagesc(3:1:48,10:1:30,log10(Z))
+contourf(3:1:48,10:1:30,log10(Z),-1.5:.5:1)
 set(gca,'YDir','normal') % set to normal Y scale
-colorbar
+chan= colorbar;
+set(chan,'XTick',-1.5:.5:1,'XTickLabel',{'30-year','10-year','3-year','1-year','0.3-year','0.1-year'})
+colormap(parula(6))
 ylabel('Maximum Wind Speed [m/s]')
 xlabel('Duration [hr]')
 title('Wind Duration vs Speed Threshold - Log Transform')
+xlim([3 42])
+ylim([10 24])
 
+%%
 % Calculate Event Recurrence for Max winds
-MaxEvent_RI = Z./yr_len;
+%MaxEvent_RI = Z./yr_len;
 
-
-cd('../maxDuration')
+cd('../../Matlab_Figures/storms/heatMaps/maxDuration')
+%%cd('../maxDuration')
 
 outname = sprintf('maxSpdvsDuration_%s',station_nm);
 hFig = gcf;

@@ -3,10 +3,10 @@
 clearvars
 
 %first load in the data
-dir_nm = '../../hourly_data/';
+dir_nm = '../../hourly_data/gap_hourly/';
 %dir_nm = '/Users/andrewmcauliffe/Desktop/hourly_data/';
-station_name = 'SeaTac';
-station_nm = 'seatac';
+station_name = 'Whidbey';
+station_nm = 'whidbey_nas';
 %file_nm = 'whidbey_nas_hourly'; % you will have to change this variable for each station
 load_file = strcat(dir_nm,station_nm, '_hourly');
 load(load_file)

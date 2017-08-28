@@ -53,9 +53,9 @@ subplot(2,2,[1 3])
 h = bar(bins,histc(x,bins)/length(x),'histc');
 h.FaceColor = [.8 .8 .8];
 xgrid = linspace(lowerBnd,xmax,100);
-line(xgrid,gevpdf(xgrid,paramEsts(1),paramEsts(2),paramEsts(3)));
+line(xgrid,.1*gevpdf(xgrid,paramEsts(1),paramEsts(2),paramEsts(3)));
 xlim([lowerBnd xmax]);
-plot_tit = sprintf('GEV - PDF - %s', station_name);
+plot_tit = sprintf('GEV - Block Maxima - %s', station_name);
 title(plot_tit)
 
 ax = gca;  % Play with the Axes 
@@ -73,7 +73,7 @@ annotation('textbox',dim,'String',tbox,'FitBoxToText','on');
 
 
 
-xlabel('Water Level [m]')
+xlabel('Total Water Level [m]')
 ylabel('Probability Density')
 %legend('Hourly','Six-Hr Avg.','Location','NorthEast')
 box on
@@ -99,7 +99,7 @@ plot(xgrid, RI)
 ylim([0 100])
 plot_tit = sprintf('Recurrence Interval - %s', station_name);
 title(plot_tit)
-xlabel('Water Level [m]')
+xlabel('Total Water Level [m]')
 ylabel('Time [years]')
 
 
