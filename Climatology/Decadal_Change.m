@@ -1,14 +1,12 @@
 %% Code to generate statistics regarding changes through time in average values
 % % 
-% clearvars
-% station_nm = 'comox'; % change this to the location of interest
-% dir_nm = '../../hourly_data/gap_hourly/station_choice/';
+%clearvars
+%station_nm = 'obs_westpoint'; % change this to the location of interest
+%dir_nm = '../../hourly_data/gap_hourly/station_choice/';
 % %dir_nm = '/Users/andrewmcauliffe/Desktop/hourly_data/';
 file_load = strcat(dir_nm, station_nm, '_hourly.mat');
-% 
-% 
-% %load in the data
 load(file_load)
+
 % clear stn_nm dir_nm file_load file_nm
 
 %% Find winds above threshold
@@ -86,8 +84,17 @@ for j = 1:length(spd_mn)
         dir_mn(j) = nanmean(wnddir(block_inds{1,j}));
     end
 end
+
+%% Create a structure from data
+% % data.(station_nm).lat = lat;
+% % data.(station_nm).lon = lon;
+% % data.(station_nm).spd_mn = spd_mn;
+% % data.(station_nm).slp_mn = slp_mn;
+% % data.(station_nm).dir_mn = dir_mn;
+
+
     
-%% Generate Decade vector to house blocks of interest
+%Generate Decade vector to house blocks of interest
 
 d_block = NaN(length(yr_breaks), 2);
 
@@ -99,24 +106,24 @@ end
         
 
 
-%% Print output to Command Window
-% % % for n = 1:length(d_block)
-% % %     if ~isnan(spd_mn(n))
-% % %         fprintf('Span: %d %d - Speed: %4.2f \t\n', d_block(n,1), d_block(n,2), spd_mn(n))
-% % %     else
-% % %         fprintf('Span: %d %d - Speed: NaN\t\n', d_block(n,1), d_block(n,2))
-% % %     end
-% % % end
-% % % fprintf('\n')
+% Print output to Command Window
+% % for n = 1:length(d_block)
+% %     if ~isnan(spd_mn(n))
+% %         fprintf('Span: %d %d - Speed: %4.2f \t\n', d_block(n,1), d_block(n,2), spd_mn(n))
+% %     else
+% %         fprintf('Span: %d %d - Speed: NaN\t\n', d_block(n,1), d_block(n,2))
+% %     end
+% % end
+% % fprintf('\n')
 
-% % % for n = 1:length(d_block)
-% % %     if ~isnan(slp_mn(n))
-% % %     fprintf('Span: %d %d - Direction: %4.2f \t\n', d_block(n,1), d_block(n,2), dir_mn(n)) 
-% % %     else
-% % %         fprintf('Span: %d %d - Direction: NaN\t\n', d_block(n,1), d_block(n,2))
-% % %     end
-% % % end
-% % % fprintf('\n')
+% % for n = 1:length(d_block)
+% %     if ~isnan(slp_mn(n))
+% %     fprintf('Span: %d %d - Direction: %4.2f \t\n', d_block(n,1), d_block(n,2), dir_mn(n)) 
+% %     else
+% %         fprintf('Span: %d %d - Direction: NaN\t\n', d_block(n,1), d_block(n,2))
+% %     end
+% % end
+% % fprintf('\n')
 
 for n = 1:length(d_block)
     if ~isnan(dir_mn(n))
