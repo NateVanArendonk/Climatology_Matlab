@@ -1,45 +1,82 @@
-%% GEV Fit for Block Maxima
+%% Rth largest GEV
+
 
 clearvars
 
 %first load in the data
 %dir_nm = '../../hourly_data/';
 dir_nm = '../../COOPS_tides/';
-station_name = 'Seattle';
-station_nm = 'seattle';
+station_name = 'Friday Harbor';
+station_nm = 'friday_harbor';
 
 load_file = strcat(dir_nm,station_nm,'/',station_nm,'_6minV');
 load(load_file)
 clear dir_nm file_nm load_file
 
 
-%% Find yearly max
-yr_vec = year(tides.time(1)):year(tides.time(end)); %make a year vec
-maxima = NaN(length(yr_vec),1); %create vector to house all of the block maxima
-for i = 1:length(yr_vec)
-    yr_ind = find(year(tides.time) == yr_vec(i));
-    % If there is more than 50% of the hours missing for that year, I will
-    % skip it
-    if length(yr_ind) < 8760 * .5
-        maxima(i) = NaN;
+%%  Find maximum yearly max
+% Number of r values to look for
+r_val = 10;
+
+%make a year vec
+yr_vec = year(tides.time(1)):year(tides.time(end)); 
+
+%create matrix to house all of the block maxima
+maxima = zeros(length(yr_vec), r_val); 
+
+for y = 1:length(yr_vec)
+    % Grab all of the years
+    yr_ind = find(year(tides.time) == yr_vec(y));
+    temp_time = tides.time(yr_ind);
+    temp_wl = tides.WL_VALUE(yr_ind);
+    
+    %Make sure atleast half of the dates exist
+    if length(yr_ind) < 87600*.5  %525600 minutes in a year, get in 6 minute increments
+        break
     else
-    %max_val = max(wndspd(yr_ind));
-        maxima(i) = max(tides.WL_VALUE(yr_ind));
+        % Genearte empty vector to house maximum values
+        max_block = NaN(1,r_val);
+
+        % Loop through and grab the maximum values and delete a window
+        % around each maximum to ensure different tide cycles
+        for m = 1:r_val
+            % Grab the maximum
+            [M, I] = max(temp_wl);
+
+            % Generate a window to delete values
+            if I < 720
+                window = I - (I-1):1:I + 720;
+            elseif length(temp_wl) - I < 720
+                window = I - 720:1:length(temp_wl);
+            else
+                window = I-720:1:I+720;
+            end
+            temp_wl(window) = [];
+            temp_time(window) = [];
+            
+            % Add the maximum value to the empty vector
+            max_block(m) = M;
+        end
     end
+    
+    % Now populate matrix with maximum values
+    maxima(y,:) = max_block;
 end
 
-nan_ind = isnan(maxima); % Find any nans and get rid of them
-maxima(nan_ind) = [];
+% Reshape to be a single vector
 
-clear j yr_ind
 
-% Get GEV statistics about the data
+%% Get GEV statistics about the data
+
+maxima = reshape(maxima, [length(yr_vec)*r_val, 1]);
+
 [paramEsts, paramCIs] = gevfit(maxima);
 %----------------Results from GEV-------------------------------
 % % % kMLE = paramEsts(1);        % Shape parameter
 % % % sigmaMLE = paramEsts(2);    % Scale parameter
 % % % muMLE = paramEsts(3);       % Location parameter
-%% Plot the GEV
+
+
 
 clf
 
@@ -55,20 +92,24 @@ h.FaceColor = [.8 .8 .8];
 xgrid = linspace(lowerBnd,xmax,100);
 line(xgrid,.1*gevpdf(xgrid,paramEsts(1),paramEsts(2),paramEsts(3)));
 xlim([lowerBnd xmax]);
-plot_tit = sprintf('GEV - Block Maxima - %s', station_name);
+plot_tit = sprintf('GEV - Rth Largest - %s', station_name);
 title(plot_tit)
 
 ax = gca;  % Play with the Axes 
-ax.XLim = [2 xmax];
+ax.XLim = [1.6 xmax];
 
+% % % Taken from R
+%paramEsts(1) = -0.4386770;
+%paramEsts(2) = 0.1129527;
+%paramEsts(3) = 2.9607970;
 
 % Add GEV parameters to the plot
-tbox = sprintf('mu = %4.2f \nsigma = %4.2f \nk = %4.2f \nn: %d',...
-    paramEsts(1),paramEsts(2),paramEsts(3), length(maxima));
+tbox = sprintf('mu = %4.2f \nsigma = %4.2f \nk = %4.2f \nr: %d',...
+    paramEsts(1),paramEsts(2),paramEsts(3), r_val);
 %text(10,0.25, tbox)
 
 % Add box around the text
-dim = [.16 .5 .3 .3];
+dim = [.15 .6 .3 .3];
 annotation('textbox',dim,'String',tbox,'FitBoxToText','on');
 
 
@@ -78,15 +119,20 @@ ylabel('Probability Density')
 %legend('Hourly','Six-Hr Avg.','Location','NorthEast')
 box on
 
+
+
+
 % Calculate the CDF - CDF will give me the probability of values 
 cdf = 1 - gevcdf(xgrid,paramEsts(1),paramEsts(2),paramEsts(3)); % create CDF from GEV PDF
+%cdf = 1 - gevcdf(xgrid,-0.3771048, 0.1034551, 3.4687437); % create CDF from GEV PDF
 
 
 % ----------Notes-----------
 % - PDF sums to 1, represents probability density
 % - CDF is the cumulative PDF, represents probability
 % - CDF is the probability of the random variable being less than X
-
+        
+        
 %% Calculate Recurrence Interval
 
 %-------Note-----------%
@@ -128,20 +174,20 @@ dim = [.62 .3 .3 .3];
 annotation('textbox',dim,'String',tbox,'FitBoxToText','on');
 
 
-
-
-
-
 %%
-% % % % Save the Plot
-% % % cd('../../Matlab_Figures/GEV/Tides/')
-% % % 
-% % % outname = sprintf('GEV_%s',station_nm);
-% % % hFig = gcf;
-% % % hFig.PaperUnits = 'inches';
-% % % hFig.PaperSize = [8.5 11];
-% % % hFig.PaperPosition = [0 0 7 7];
-% % % print(hFig,'-dpng','-r350',outname) %saves the figure, (figure, filetype, resolution, file name)
-% % % close(hFig)
-% % % 
-% % % cd('../../../matlab/Climatology')
+% Save the Plot
+%cd('../../Matlab_Figures/GEV/Tides/Rth/')
+cd('../../swin/GEV/10_block/')
+
+outname = sprintf('GEV10_%s',station_nm);
+hFig = gcf;
+hFig.PaperUnits = 'inches';
+hFig.PaperSize = [8.5 11];
+hFig.PaperPosition = [0 0 7 7];
+print(hFig,'-dpng','-r350',outname) %saves the figure, (figure, filetype, resolution, file name)
+close(hFig)
+
+cd('../../../matlab/Climatology')
+
+
+

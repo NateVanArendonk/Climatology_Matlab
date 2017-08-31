@@ -1,7 +1,7 @@
 
 clearvars
 
-dir_nm = '../../hourly_data/gap_hourly/';
+dir_nm = '../../hourly_data/gap_hourly/station_choice/';
   % grabs all the files ending in .mat
 d = dir([dir_nm, '/*.mat']);
 
@@ -19,7 +19,13 @@ for n = 1:length(d)
     missing = (length(spd_gap)/length(wndspd))*100;
     missing = num2str(missing);
     
+    slp_gap = find(isnan(slp));
+    m2 = (length(slp_gap)/length(slp))*100;
+    m2 = num2str(m2);
     
-    txt = sprintf('%s: missing %s percent', station_nm, missing); 
+    
+    txt = sprintf('%s: missing %s percent - speed', station_nm, missing); 
+    txt2 = sprintf('%s: missing %s percent - pressure\n', station_nm, m2);
     disp(txt)
+    disp(txt2)
 end
