@@ -5,10 +5,11 @@ clearvars
 %first load in the data
 %dir_nm = '../../hourly_data/';
 dir_nm = '../../COOPS_tides/';
-station_name = 'Port Townsend';
-station_nm = 'port_townsend';
+station_name = 'La Conner';
+station_nm = 'LaConner';
 
-load_file = strcat(dir_nm,station_nm,'/',station_nm,'_6minV');
+%load_file = strcat(dir_nm,station_nm,'/',station_nm,'_6minV');
+load_file = strcat(dir_nm,station_nm,'/',station_nm);
 load(load_file)
 clear dir_nm file_nm load_file
 

@@ -6,8 +6,8 @@ clearvars
 %first load in the data
 %dir_nm = '../../hourly_data/';
 dir_nm = '../../COOPS_tides/';
-station_name = 'Friday Harbor';
-station_nm = 'friday_harbor';
+station_name = 'Seattle';
+station_nm = 'seattle';
 
 load_file = strcat(dir_nm,station_nm,'/',station_nm,'_6minV');
 load(load_file)
@@ -16,13 +16,15 @@ clear dir_nm file_nm load_file
 
 %%  Find maximum yearly max
 % Number of r values to look for
-r_val = 10;
+r_val = 3;
 
 %make a year vec
 yr_vec = year(tides.time(1)):year(tides.time(end)); 
 
 %create matrix to house all of the block maxima
 maxima = zeros(length(yr_vec), r_val); 
+%Detrend water
+tides.WL_VALUE = detrend(tides.WL_VALUE);
 
 for y = 1:length(yr_vec)
     % Grab all of the years
@@ -63,11 +65,11 @@ for y = 1:length(yr_vec)
     maxima(y,:) = max_block;
 end
 
-% Reshape to be a single vector
+
 
 
 %% Get GEV statistics about the data
-
+% Reshape to be a single vector
 maxima = reshape(maxima, [length(yr_vec)*r_val, 1]);
 
 [paramEsts, paramCIs] = gevfit(maxima);
