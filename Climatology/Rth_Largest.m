@@ -1,7 +1,7 @@
 %% Rth largest GEV
 
 
-clearvars
+%clearvars
 
 %first load in the data
 %dir_nm = '../../hourly_data/';
@@ -9,7 +9,7 @@ dir_nm = '../../COOPS_tides/';
 station_name = 'Seattle';
 station_nm = 'seattle';
 
-load_file = strcat(dir_nm,station_nm,'/',station_nm,'_hrV');
+load_file = strcat(dir_nm,station_nm,'/',station_nm,'_6minV');
 load(load_file)
 clear dir_nm file_nm load_file
 
@@ -33,7 +33,7 @@ for y = 1:length(yr_vec)
     temp_wl = tides.WL_VALUE(yr_ind);
     
     %Make sure atleast half of the dates exist
-    if length(yr_ind) < 8760*.5  %525600 minutes in a year, get in 6 minute increments so use 87600
+    if length(yr_ind) < 87600*.5  %525600 minutes in a year, get in 6 minute increments so use 87600
         break
     else
         % Genearte empty vector to house maximum values
@@ -46,12 +46,12 @@ for y = 1:length(yr_vec)
             [M, I] = max(temp_wl);
 
             % Generate a window to delete values
-            if I < 72
-                window = I - (I-1):1:I + 72;
-            elseif length(temp_wl) - I < 72
-                window = I - 72:1:length(temp_wl);
+            if I < 720
+                window = I - (I-1):1:I + 720;
+            elseif length(temp_wl) - I < 720
+                window = I - 720:1:length(temp_wl);
             else
-                window = I-72:1:I+72;
+                window = I-720:1:I+720;
             end
             temp_wl(window) = [];
             temp_time(window) = [];

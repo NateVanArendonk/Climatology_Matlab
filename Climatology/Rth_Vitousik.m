@@ -101,7 +101,7 @@ x_Tr=@(yr,mu,sig,k) gevinv(1-(ri./yr),k,sig,mu);          % calculate event leve
 Tr_pct_red=@(TR,mu,sig,k,SLR) (TR-Tr(x_Tr(TR,mu,sig,k),mu+SLR,sig,k))./TR; % calculate the percent reduction in return period
  
 % plot GEV model
-figure;
+figure(2);
 subplot(1,2,1);
 plot(h_sort,E_data,'ro',x_inv(E1,mu,sigma,k),E1,'b');
 xlabel('extreme sea level [m]');
