@@ -9,7 +9,7 @@ dir_nm = '../../COOPS_tides/';
 station_name = 'Seattle';
 station_nm = 'seattle';
 
-load_file = strcat(dir_nm,station_nm,'/',station_nm,'_6minV');
+load_file = strcat(dir_nm,station_nm,'/',station_nm,'_hrV');
 load(load_file)
 clear dir_nm file_nm load_file
 
@@ -33,7 +33,7 @@ for y = 1:length(yr_vec)
     temp_wl = tides.WL_VALUE(yr_ind);
     
     %Make sure atleast half of the dates exist
-    if length(yr_ind) < 87600*.5  %525600 minutes in a year, get in 6 minute increments
+    if length(yr_ind) < 8760*.5  %525600 minutes in a year, get in 6 minute increments so use 87600
         break
     else
         % Genearte empty vector to house maximum values
@@ -46,12 +46,12 @@ for y = 1:length(yr_vec)
             [M, I] = max(temp_wl);
 
             % Generate a window to delete values
-            if I < 720
-                window = I - (I-1):1:I + 720;
-            elseif length(temp_wl) - I < 720
-                window = I - 720:1:length(temp_wl);
+            if I < 72
+                window = I - (I-1):1:I + 72;
+            elseif length(temp_wl) - I < 72
+                window = I - 72:1:length(temp_wl);
             else
-                window = I-720:1:I+720;
+                window = I-72:1:I+72;
             end
             temp_wl(window) = [];
             temp_time(window) = [];
@@ -82,7 +82,7 @@ maxima = reshape(maxima, [length(yr_vec)*r_val, 1]);
 
 clf
 
-lowerBnd = 2;
+lowerBnd = 0;
 x = maxima;  
 xmax = 1.1*max(x);
 bins = floor(lowerBnd):.1:ceil(xmax);
@@ -111,7 +111,7 @@ tbox = sprintf('mu = %4.2f \nsigma = %4.2f \nk = %4.2f \nr: %d',...
 %text(10,0.25, tbox)
 
 % Add box around the text
-dim = [.15 .6 .3 .3];
+dim = [.3 .6 .3 .3];
 annotation('textbox',dim,'String',tbox,'FitBoxToText','on');
 
 
@@ -179,9 +179,9 @@ annotation('textbox',dim,'String',tbox,'FitBoxToText','on');
 %%
 % Save the Plot
 %cd('../../Matlab_Figures/GEV/Tides/Rth/')
-cd('../../swin/GEV/10_block/')
-
-outname = sprintf('GEV10_%s',station_nm);
+%cd('../../swin/GEV/10_block/')
+cd('../../');
+outname = sprintf('GEVrof3_%s_1898_17',station_nm);
 hFig = gcf;
 hFig.PaperUnits = 'inches';
 hFig.PaperSize = [8.5 11];
@@ -189,7 +189,7 @@ hFig.PaperPosition = [0 0 7 7];
 print(hFig,'-dpng','-r350',outname) %saves the figure, (figure, filetype, resolution, file name)
 close(hFig)
 
-cd('../../../matlab/Climatology')
-
+%cd('../../../matlab/Climatology')
+cd('matlab/Climatology')
 
 
