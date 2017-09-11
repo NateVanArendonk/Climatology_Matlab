@@ -129,6 +129,20 @@ xlabel('Total Water Level [m]')
 ylabel('Probability Density')
 box on
 
+
+%% Save the plot 
+cd('../../');
+outname = sprintf('GEV_compareMethods_%s',station_nm);
+hFig = gcf;
+hFig.PaperUnits = 'inches';
+hFig.PaperSize = [8.5 11];
+hFig.PaperPosition = [0 0 7 7];
+print(hFig,'-dpng','-r350',outname) %saves the figure, (figure, filetype, resolution, file name)
+close(hFig)
+
+%cd('../../../matlab/Climatology')
+cd('matlab/Climatology')
+
 %% Calculate Recurrence Interval
 
 
@@ -207,3 +221,16 @@ tboxv = sprintf('\t\t\t\t\t\t\tVit\n 100 yr: %4.2f m\n50 yr: %4.2f m\n25 yr: %4.
     ,R100MLEvit, R50MLEvit, R25MLEvit, R10MLEvit, R5MLEvit, R2MLEvit);
 dim = [.3 .25 .3 .3];
 annotation('textbox',dim,'String',tboxv,'FitBoxToText','on');
+
+%% Save the plot
+cd('../../');
+outname = sprintf('RI_compareMethods_%s',station_nm);
+hFig = gcf;
+hFig.PaperUnits = 'inches';
+hFig.PaperSize = [8.5 11];
+hFig.PaperPosition = [0 0 7 7];
+print(hFig,'-dpng','-r350',outname) %saves the figure, (figure, filetype, resolution, file name)
+close(hFig)
+
+%cd('../../../matlab/Climatology')
+cd('matlab/Climatology')
