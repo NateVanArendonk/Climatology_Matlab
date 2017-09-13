@@ -1,72 +1,108 @@
-% blocksize = 1000;
-% nblocks = 250;
-% 
-% x = max(t); % 250 column maxima
-% paramEsts = gevfit(x);
-% 
-% 
-% histogram(x,2:20,'FaceColor',[.8 .8 1]);
-% xgrid = linspace(2,20,1000);
-% line(xgrid,nblocks*...
-%      gevpdf(xgrid,paramEsts(1),paramEsts(2),paramEsts(3)));
- 
-%% GEV Fit for Block Maxima
-
+%% GEV Test
 clearvars
 
 %first load in the data
-dir_nm = '../../hourly_data/';
-%dir_nm = '/Users/andrewmcauliffe/Desktop/hourly_data/';
-station_name = 'Van Airport';
-station_nm = 'van_arpt';
-%file_nm = 'whidbey_nas_hourly'; % you will have to change this variable for each station
-load_file = strcat(dir_nm,station_nm, '_hourly');
+dir_nm = '../../COOPS_tides/';
+%dir_nm = '../../hourly_data/gap_hourly/Station_Choice/';
+station_name = 'Seattle';
+station_nm = 'seattle';
+
+load_file = strcat(dir_nm,station_nm,'/',station_nm,'_hrV');
 load(load_file)
 clear dir_nm file_nm load_file
-wnddir = wnddir';
+%% Collect maxima
 
-% for NDBC data get rid of 'hourly' in load_file 
-% Also add the following line after wnddir = wndir';
-            % wndspd = wndspd_obs;
+% Years available
+yr = year(tides.time(1)):year(tides.time(end));
 
+% rth values to collect (can use less later)
+r_num = 10;
 
-%% Find yearly max
+% Min distance between events (half hour incr) 24 if half our, 12 if hour
+min_sep = 12;
 
-yr_vec = year(time(1)):year(time(end)); %make a year vec
-maxima = NaN(length(yr_vec),1); %create vector to house all of the block maxima
-for i = 1:length(yr_vec)
-    yr_ind = find(year(time) == yr_vec(i));
-    % If there is more than 50% of the hours missing for that year, I will
-    % skip it
-    if length(yr_ind) < 8760 * .5
-        continue
-    else
-    %max_val = max(wndspd(yr_ind));
-        maxima(i) = max(wndspd(yr_ind));
+% Preallocate
+maxima = zeros(length(yr),r_num);
+
+% Loop
+for yy=1:length(yr)
+    inds = year(tides.time) == yr(yy);
+    temp = tides.WL_VALUE(inds);
+    for r=1:r_num
+        [maxima(yy,r), I] = max(temp);
+        pop_inds = max([1 I-min_sep]):min([length(temp) I+min_sep]);
+        temp(pop_inds) = [];
     end
 end
 
-del_ind = find(maxima < 10);   % find indices less than 10, likely indicating poor data coverage or a large data gap
-maxima(del_ind) = []; % get rid of data
-yr_vec(del_ind) = []; % get rid of year from year vec
+% Grab only three values and vectorize it 
+maxima = maxima(:,1:3); maxima = maxima(:);
+[parmhat, paramCI] = gevfit(maxima);
 
-clear j yr_ind
+%%  Print out values for 
 
-% Get GEV statistics about the data
-[paramEsts, paramCIs] = gevfit(maxima);
-%----------------Results from GEV-------------------------------
-kMLE = paramEsts(1);        % Shape parameter
-sigmaMLE = paramEsts(2);    % Scale parameter
-muMLE = paramEsts(3);       % Location parameter
-lowerBnd = muMLE-sigmaMLE./kMLE;
-%% Plot the GEV
-x = maxima;  
-ymax = 1.1*max(x);
-bins = floor(lowerBnd):ceil(ymax);
-h = bar(bins,histc(x,bins)/length(x),'histc');
-h.FaceColor = [.9 .9 .9];
-ygrid = linspace(lowerBnd,ymax,100);
-line(ygrid,gevpdf(ygrid,kMLE,sigmaMLE,muMLE));
-xlabel('Block Maximum');
-ylabel('Probability Density');
-xlim([lowerBnd ymax]);
+fprintf('Parameters found: \n')
+disp(['--------------------------------------------'])
+disp(['k','               ',num2str(parmhat(1),4)])
+disp(['mu','              ',num2str(parmhat(2),4)])
+disp(['sigma','           ',num2str(parmhat(3),4)])
+disp(['---------------------------------------------'])
+fprintf('\n\n')
+
+%%
+
+% cdf of GEV
+X = linspace(min(maxima),3*max(maxima),1e4); 
+F0  = gevcdf(X,parmhat(1),parmhat(2),parmhat(3)); 
+% Return period R
+R = 1./(1-F0); % matlab
+
+% Find return period
+[~,ind_2] = min(abs(R(1,:)-2));
+[~,ind_5] = min(abs(R(1,:)-5));
+[~,ind_10] = min(abs(R(1,:)-10));
+[~,ind_25] = min(abs(R(1,:)-25));
+[~,ind_50] = min(abs(R(1,:)-50));
+[~,ind_100] = min(abs(R(1,:)-100));
+[~,ind_200] = min(abs(R(1,:)-200));
+[~,ind_500] = min(abs(R(1,:)-500));
+[~,ind_1000] = min(abs(R(1,:)-1000));
+
+
+fprintf('Prediction of extreme Total Water Levels: \n')
+
+
+% val = [X(ind_2);X(ind_5);X(ind_10);X(ind_25);X(ind_50);X(ind_100);X(ind_200);X(ind_500);X(ind_1000)];
+% disp('--------------------------------------------------------------------------------------------')
+% disp(['Return period (years)','              Predicted       gust       speed       (m/s)'])
+% disp(['--------------------- ',' ------------------------------------------------------------------'])
+% disp(['       ','(Matlab)'])
+
+
+
+disp(['2',',num2str(val(1,4),3)])'
+disp(['5',',num2str(val(2,4),3)])'
+disp(['10'',num2str(val(3,4),3)])'    
+disp(['25',   ',num2str(val(4,4),3)])'
+disp(['50',   ',num2str(val(5,4),3)])'
+disp(['100',  ',num2str(val(6,4),3)])'
+disp(['200',  ',num2str(val(7,4),3)])'
+disp(['500',  ',num2str(val(8,4),3)])'
+disp(['1000', ',num2str(val(9,4),3)])'
+
+% 
+% disp(['--------------------------------------------------------------------------------------------'])
+% 
+% val = [X(ind_50);X(ind_100);X(ind_200);X(ind_500);X(ind_1000)];
+% disp(['--------------------------------------------------------------------------------------------'])
+% disp(['Return period (years)','              Predicted       gust       speed       (m/s)'])
+% disp(['--------------------- ',' ------------------------------------------------------------------'])
+% disp(['       ','                  (Gumbel)','       (Gringorten)','       (moments)','       (Matlab)'])
+% disp(['50','                        ',num2str(val(1,1),3),'           ',num2str(val(1,2),3),'               ',num2str(val(1,3),3),'             ',num2str(val(1,4),3)])
+% disp(['100','                       ',num2str(val(2,1),3),'             ',num2str(val(2,2),3),'               ',num2str(val(2,3),3),'             ',num2str(val(2,4),3)])
+% disp(['200','                       ',num2str(val(3,1),3),'           ',num2str(val(3,2),3),'                 ',num2str(val(3,3),3),'             ',num2str(val(3,4),3)])
+% disp(['500','                       ',num2str(val(4,1),3),'           ',num2str(val(4,2),3),'               ',num2str(val(4,3),3),'             ',num2str(val(4,4),3)])
+% disp(['1000','                      ',num2str(val(5,1),3),'           ',num2str(val(5,2),3),'                 ',num2str(val(5,3),3),'             ',num2str(val(5,4),3)])
+% disp(['--------------------------------------------------------------------------------------------'])
+
+
