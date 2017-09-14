@@ -48,10 +48,10 @@ for yy=1:length(yr)
 end
 %%
 % Get GEV statistics about the data
-%[parmhat] = gevfit_rth(maxima(:,1:r_val));
+[parmhat] = gevfit_rth(maxima(:,1:r_val));
 
-maxima = maxima(:,1:r_val);
-[parmhat, paramCIs] = gevfit(maxima(:));
+%maxima = maxima(:,1:r_val);
+%[parmhat, paramCIs] = gevfit(maxima(:));
 %----------------Results from GEV-------------------------------
 % % % kMLE = paramEsts(1);        % Shape parameter
 % % % sigmaMLE = paramEsts(2);    % Scale parameter
@@ -124,7 +124,7 @@ z(3).Color = 'blue';
 
 % Set Plot Limits
 plot_tit = sprintf('Recurrence Interval [m] - %s', station_name);
-title(plot_tit)
+%title(plot_tit)
 xlabel('Total Water Level [m]')
 ylabel('Time [years]')
 
@@ -147,10 +147,10 @@ R5MLE = gevinv(1-1./5,parmhat(1),parmhat(2),parmhat(3)+ten_mean);
 R2MLE = gevinv(1-1./2,parmhat(1),parmhat(2),parmhat(3)+ten_mean);
 
 % Add GEV parameters to the plot
-tbox = sprintf('100 yr: %4.2f m\n50 yr: %4.2f m\n25 yr: %4.2f m\n10 yr: %4.2f m\n5 yr: %4.2f m\n2 yr: %4.2f m'...
-    ,R100MLE, R50MLE, R25MLE, R10MLE, R5MLE, R2MLE);
-dim = [.2 .35 .3 .3];
-annotation('textbox',dim,'String',tbox,'FitBoxToText','on');
+%tbox = sprintf('100 yr: %4.2f m\n50 yr: %4.2f m\n25 yr: %4.2f m\n10 yr: %4.2f m\n5 yr: %4.2f m\n2 yr: %4.2f m'...
+%    ,R100MLE, R50MLE, R25MLE, R10MLE, R5MLE, R2MLE);
+%dim = [.2 .35 .3 .3];
+%annotation('textbox',dim,'String',tbox,'FitBoxToText','on');
 
 
 % Find the location on the 1' SLR curve of 10 and 100 year levels
@@ -178,17 +178,17 @@ lgd = legend([z(2) z(1) z(3)],'2ft SLR', '1ft SLR', 'Current WL');
 lgd.Position = [.21 .845 .05 .05];
 
 % Add text to figure showing recurrence interval change
-nx = 3;
+nx = 2.95;
 ny = RI(loc1);
-ny = 1.30;
+ny = 1.18;
 txt1 = sprintf('%4.2f years', RI(loc1));
 t1 = text(nx,ny,txt1);
 t1.FontSize = 14;
 
 
-mx = 3.1;
+mx = 3.18;
 my = RI(loc2);
-my = 2.43;
+my = 1.73;
 txt2 = sprintf('%4.2f years', RI(loc2));
 t2 = text(mx,my,txt2);
 t2.FontSize = 14;
@@ -196,7 +196,7 @@ t2.FontSize = 14;
 % Save the Plot
 cd('../../')
 
-outname = sprintf('Prob_exceed_change_BLOCK%s',station_nm);
+outname = sprintf('Prob_exceed_change_Rth_BLANK%s',station_nm);
 hFig = gcf;
 hFig.PaperUnits = 'inches';
 hFig.PaperSize = [8.5 11];

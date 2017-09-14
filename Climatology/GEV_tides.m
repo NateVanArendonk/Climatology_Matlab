@@ -59,9 +59,8 @@ end
 % % % muMLE = paramEsts(3);       % Location parameter
 %% Plot the GEV
 
-xlim = [(min(maxima(:))) (1.1*max(maxima(:)))];
+xlim = [(min(maxima(:))+ten_mean) (1.1*max(maxima(:))+ten_mean)];
 
-clf
 subplot(2,2,[1 3])
 pdf_data = histogram(maxima(:,1:r_val)+ten_mean,8,'Normalization','pdf');
 mycolors = jet(10);
@@ -74,18 +73,18 @@ plot(xgrid,pdf_gev,'Color',mycolors(1,:))
 
 
 plot_tit = sprintf('GEV - Rth - %s', station_name);
-title(plot_tit)
+%title(plot_tit)
 % Add GEV parameters to the plot
-tbox = sprintf('mu = %4.2f \nsigma = %4.2f \nk = %4.2f \nn: %d \nr: %d',...
-    parmhat(1),parmhat(2),parmhat(3), length(maxima), r_val);
+%tbox = sprintf('mu = %4.2f \nsigma = %4.2f \nk = %4.2f \nn: %d \nr: %d',...
+%    parmhat(1),parmhat(2),parmhat(3), length(maxima), r_val);
 %text(10,0.25, tbox)
 
 % Add box around the text
-dim = [.143 .6 .3 .3];
-annotation('textbox',dim,'String',tbox,'FitBoxToText','on');
+%dim = [.143 .6 .3 .3];
+%annotation('textbox',dim,'String',tbox,'FitBoxToText','on');
 
 ax = gca;
-ax.XLim = ([2.4 4]);
+ax.XLim = ([3 4]);
 set(gca,'XMinorTick','on')
 
 
@@ -157,13 +156,13 @@ subplot(2,2,[2 4])
 plot(xgrid, RI)
 ylim([0 100])
 plot_tit = sprintf('Recurrence Interval - %s', station_name);
-title(plot_tit)
+%title(plot_tit)
 xlabel('Total Water Level [m]')
 ylabel('Time [years]')
 
 
 ax = gca;
-ax.XLim = ([3 3.8]);
+ax.XLim = ([3.1 3.8]);
 set(gca,'XMinorTick','on')  %add minor tick marks on x-axis
 
 box on 
@@ -180,12 +179,12 @@ R5MLE = gevinv(1-1./5,parmhat(1),parmhat(2),parmhat(3)+ten_mean);
 R2MLE = gevinv(1-1./2,parmhat(1),parmhat(2),parmhat(3)+ten_mean);
 
 % Add GEV parameters to the plot
-tbox = sprintf('100 yr: %4.2f m\n50 yr: %4.2f m\n25 yr: %4.2f m\n10 yr: %4.2f m\n5 yr: %4.2f m\n2 yr: %4.2f m'...
-    ,R100MLE, R50MLE, R25MLE, R10MLE, R5MLE, R2MLE);
+%tbox = sprintf('100 yr: %4.2f m\n50 yr: %4.2f m\n25 yr: %4.2f m\n10 yr: %4.2f m\n5 yr: %4.2f m\n2 yr: %4.2f m'...
+%    ,R100MLE, R50MLE, R25MLE, R10MLE, R5MLE, R2MLE);
 %text(6,60, tbox)
 
-dim = [.62 .3 .3 .3];
-annotation('textbox',dim,'String',tbox,'FitBoxToText','on');
+%dim = [.62 .3 .3 .3];
+%annotation('textbox',dim,'String',tbox,'FitBoxToText','on');
 
 
 
@@ -196,7 +195,7 @@ annotation('textbox',dim,'String',tbox,'FitBoxToText','on');
 % Save the Plot
 cd('../../')
 
-outname = sprintf('GEV_%s_Rth',station_nm);
+outname = sprintf('GEV_%s_Rth_BLANK',station_nm);
 hFig = gcf;
 hFig.PaperUnits = 'inches';
 hFig.PaperSize = [8.5 11];

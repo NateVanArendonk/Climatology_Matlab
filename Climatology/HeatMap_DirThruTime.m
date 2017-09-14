@@ -24,13 +24,13 @@ Zspd = zeros(size(X));
 for y = 1:length(Y(:,1))                                                   % For every value in Y
     yr_ind = find(year(time) == Y(y));                                     % Find that current year
     if length(yr_ind) > 8760 * .5
-        for x = 1:length(X(1,:))                                               % For every value in x
-            if x == 1                                                          % First value only
-                dir_ind = find(wnddir(yr_ind) <= X(1,x));                      % Find all directions between 0 and first threshold
-                if isempty(dir_ind)                                            % If it's empty
-                    Z(y,x) = 0;                                                % Set it equal to zero
+        for x = 1:length(X(1,:))                                           % For every value in x
+            if x == 1                                                      % First value only
+                dir_ind = find(wnddir(yr_ind) <= X(1,x));                  % Find all directions between 0 and first threshold
+                if isempty(dir_ind)                                        % If it's empty
+                    Z(y,x) = 0;                                            % Set it equal to zero
                 else
-                    Z(y,x) = length(dir_ind);                                  % Otherwise populate Z with length of hits
+                    Z(y,x) = length(dir_ind);                              % Otherwise populate Z with length of hits
                     s_i = find(wndspd(dir_ind) > 10);
                     Zspd(x,y) = length(s_i);
                     if Z(y,x) > 500
