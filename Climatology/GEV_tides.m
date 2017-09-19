@@ -7,7 +7,7 @@ clearvars
 dir_nm = '../../COOPS_tides/';
 station_name = 'Seattle';
 station_nm = 'seattle';
-
+%load_file = strcat(dir_nm,station_nm,'/',station_nm); % For La Conner
 load_file = strcat(dir_nm,station_nm,'/',station_nm,'_hrV');
 load(load_file)
 clear dir_nm file_nm load_file
@@ -16,59 +16,109 @@ clear dir_nm file_nm load_file
 
 %% Collect maxima
 
+
+if exist('tides') % If using the data with a structure component
 % Years available
-yr = year(tides.time(1)):year(tides.time(end));
-% Calculate the mean over the past 10 years and add it to the GEV param mu
-tinds = find(year(tides.time) == yr(end) - 10);
-inds = tinds(1):length(tides.WL_VALUE);
-ten_mean = mean(tides.WL_VALUE(inds));
+    yr = year(tides.time(1)):year(tides.time(end));
+    % Calculate the mean over the past 10 years and add it to the GEV param mu
+    tinds = find(year(tides.time) == yr(end) - 10);
+    inds = tinds(1):length(tides.WL_VALUE);
+    ten_mean = mean(tides.WL_VALUE(inds));
 
 
-tides.WL_VALUE = detrend(tides.WL_VALUE);
+    tides.WL_VALUE = detrend(tides.WL_VALUE);
 
-% rth values to collect (can use less later)
-r_num = 10;
-r_val = 3;
+    % rth values to collect (can use less later)
+    r_num = 10;
+    r_val = 1;
 
-% Min distance between events (half hour incr) 24 if half our, 12 if hour
-min_sep = 12;
+    % Min distance between events (half hour incr) 24 if half our, 12 if hour
+    min_sep = 12;
 
-% Preallocate
-maxima = zeros(length(yr),r_num);
+    % Preallocate
+    maxima = zeros(length(yr),r_num);
 
-% Loop
-for yy=1:length(yr)
-    inds = year(tides.time) == yr(yy);
-    temp = tides.WL_VALUE(inds);
-    for r=1:r_num
-        [maxima(yy,r), I] = max(temp);
-        pop_inds = max([1 I-min_sep]):min([length(temp) I+min_sep]);
-        temp(pop_inds) = [];
+    % Loop
+    for yy=1:length(yr)
+        inds = year(tides.time) == yr(yy);
+        temp = tides.WL_VALUE(inds);
+        for r=1:r_num
+            [maxima(yy,r), I] = max(temp);
+            pop_inds = max([1 I-min_sep]):min([length(temp) I+min_sep]);
+            temp(pop_inds) = [];
+        end
     end
+    
+    
+else % if using LaConner tides where a structure doesnt exist
+    yr = year(time(1)):year(time(end));
+    
+    % Combine tide predictions and NTR for total water level estimates
+    twl_est = tide_pred + ntr;
+
+    % Convert to mllw
+    twl_est = twl_est + .461;
+
+    
+    % Calculate the mean over the past 10 years and add it to the GEV param mu
+    tinds = find(year(time) == yr(end) - 10);
+    inds = tinds(1):length(twl_est);
+    ten_mean = mean(twl_est(inds));
+
+    % Subtract offset calculated by Sean
+    twl_est = twl_est - 0.283464;
+    %twl = detrend(twl);
+
+    % rth values to collect (can use less later)
+    r_num = 10;
+    r_val = 1;
+
+    % Min distance between events (half hour incr) 24 if half our, 12 if hour
+    min_sep = 12;
+
+    % Preallocate
+    maxima = zeros(length(yr),r_num);
+
+    % Loop
+    for yy=1:length(yr)
+        inds = year(time) == yr(yy);
+        temp = twl_est(inds);
+        for r=1:r_num
+            [maxima(yy,r), I] = max(temp);
+            pop_inds = max([1 I-min_sep]):min([length(temp) I+min_sep]);
+            temp(pop_inds) = [];
+        end
+    end
+    %% Get Rid of NaNs
+    %
+    maxima(1,:) = [];
 end
+
+
+
 
 %%
 % Get GEV statistics about the data
 [parmhat] = gevfit_rth(maxima(:,1:r_val));
 
-% maxima = maxima(:,1:r_val);
-% [parmhat, paramCIs] = gevfit(maxima(:));
+%maxima = maxima(:,1:r_val);
+%[parmhat, paramCIs] = gevfit(maxima(:));
 %----------------Results from GEV-------------------------------
 % % % kMLE = paramEsts(1);        % Shape parameter
 % % % sigmaMLE = paramEsts(2);    % Scale parameter
 % % % muMLE = paramEsts(3);       % Location parameter
 %% Plot the GEV
 
-xlim = [(min(maxima(:))+ten_mean) (1.1*max(maxima(:))+ten_mean)];
+xlim = [(min(maxima(:)))-.5 (1.1*max(maxima(:)))];
 
 subplot(2,2,[1 3])
-pdf_data = histogram(maxima(:,1:r_val)+ten_mean,8,'Normalization','pdf');
+pdf_data = histogram(maxima(:,1:r_val),8,'Normalization','pdf');
 mycolors = jet(10);
 hold on
 
 % GEV pdf 
-xgrid = linspace(xlim(1),xlim(2),100);
-pdf_gev = gevpdf(xgrid,parmhat(1),parmhat(2),parmhat(3)+ten_mean); 
+xgrid = linspace(xlim(1),xlim(2)+.5,100);
+pdf_gev = gevpdf(xgrid,parmhat(1),parmhat(2),parmhat(3)); 
 plot(xgrid,pdf_gev,'Color',mycolors(1,:))
 
 
@@ -84,7 +134,7 @@ plot_tit = sprintf('GEV - Rth - %s', station_name);
 %annotation('textbox',dim,'String',tbox,'FitBoxToText','on');
 
 ax = gca;
-ax.XLim = ([3 4]);
+ax.XLim = ([3.4 4.4]);
 set(gca,'XMinorTick','on')
 
 
@@ -95,7 +145,7 @@ ylabel('Probability Density')
 box on
 
 % Calculate the CDF - CDF will give me the probability of values 
-cdf = 1 - gevcdf(xgrid,parmhat(1),parmhat(2),parmhat(3)+ten_mean); % create CDF from GEV PDF
+cdf = 1 - gevcdf(xgrid,parmhat(1),parmhat(2),parmhat(3)); % create CDF from GEV PDF
 
 
 %% Old way
@@ -162,7 +212,7 @@ ylabel('Time [years]')
 
 
 ax = gca;
-ax.XLim = ([3.1 3.8]);
+ax.XLim = ([3.7 4.3]);
 set(gca,'XMinorTick','on')  %add minor tick marks on x-axis
 
 box on 
@@ -171,20 +221,20 @@ grid on
 
 % Generate specific values for recurrence levels
 
-R100MLE = gevinv(1-1./100,parmhat(1),parmhat(2),parmhat(3)+ten_mean);
-R50MLE = gevinv(1-1./50,parmhat(1),parmhat(2),parmhat(3)+ten_mean);
-R25MLE = gevinv(1-1./25,parmhat(1),parmhat(2),parmhat(3)+ten_mean);
-R10MLE = gevinv(1-1./10,parmhat(1),parmhat(2),parmhat(3)+ten_mean);
-R5MLE = gevinv(1-1./5,parmhat(1),parmhat(2),parmhat(3)+ten_mean);
-R2MLE = gevinv(1-1./2,parmhat(1),parmhat(2),parmhat(3)+ten_mean);
+R100MLE = gevinv(1-1./100,parmhat(1),parmhat(2),parmhat(3));
+R50MLE = gevinv(1-1./50,parmhat(1),parmhat(2),parmhat(3));
+R25MLE = gevinv(1-1./25,parmhat(1),parmhat(2),parmhat(3));
+R10MLE = gevinv(1-1./10,parmhat(1),parmhat(2),parmhat(3));
+R5MLE = gevinv(1-1./5,parmhat(1),parmhat(2),parmhat(3));
+R2MLE = gevinv(1-1./2,parmhat(1),parmhat(2),parmhat(3));
 
 % Add GEV parameters to the plot
-%tbox = sprintf('100 yr: %4.2f m\n50 yr: %4.2f m\n25 yr: %4.2f m\n10 yr: %4.2f m\n5 yr: %4.2f m\n2 yr: %4.2f m'...
-%    ,R100MLE, R50MLE, R25MLE, R10MLE, R5MLE, R2MLE);
-%text(6,60, tbox)
+tbox = sprintf('100 yr: %4.2f m\n50 yr: %4.2f m\n25 yr: %4.2f m\n10 yr: %4.2f m\n5 yr: %4.2f m\n2 yr: %4.2f m'...
+    ,R100MLE, R50MLE, R25MLE, R10MLE, R5MLE, R2MLE);
+text(6,60, tbox)
 
-%dim = [.62 .3 .3 .3];
-%annotation('textbox',dim,'String',tbox,'FitBoxToText','on');
+dim = [.62 .3 .3 .3];
+annotation('textbox',dim,'String',tbox,'FitBoxToText','on');
 
 
 
@@ -195,7 +245,7 @@ R2MLE = gevinv(1-1./2,parmhat(1),parmhat(2),parmhat(3)+ten_mean);
 % Save the Plot
 cd('../../')
 
-outname = sprintf('GEV_%s_Rth_BLANK',station_nm);
+outname = sprintf('GEV_%s_Rth_r%d',station_nm, r_val);
 hFig = gcf;
 hFig.PaperUnits = 'inches';
 hFig.PaperSize = [8.5 11];

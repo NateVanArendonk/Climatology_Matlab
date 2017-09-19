@@ -37,11 +37,11 @@ maxima = zeros(length(yr),r_num);
 % Loop
 for yy=1:length(yr)
     inds = year(tides.time) == yr(yy);
-    temp = tides.WL_VALUE(inds);
+    val_ind = tides.WL_VALUE(inds);
     for r=1:r_num
-        [maxima(yy,r), I] = max(temp);
-        pop_inds = max([1 I-min_sep]):min([length(temp) I+min_sep]);
-        temp(pop_inds) = [];
+        [maxima(yy,r), I] = max(val_ind);
+        pop_inds = max([1 I-min_sep]):min([length(val_ind) I+min_sep]);
+        val_ind(pop_inds) = [];
     end
 end
 
@@ -69,7 +69,7 @@ muSE = (parmCI(1,3)-muhat)/2;
 %% Run Monte Carlo for Parameters 
 tic
 % preallocate
-its = 100;
+its = 10000;
 monteK = zeros(1,its);
 monteSig = monteK;
 monteMu = monteK;
@@ -81,44 +81,80 @@ for jj = 1:its
     monteMu(1,jj) = muhat + (muSE * randn(1,1));
 end
 toc
-%% visualize results 
-figure(1)
-subplot(3,1,1)
-hist(monteK)
-xlabel('K-hat')
-ylabel('# of hits')
-
-subplot(3,1,2)
-hist(monteSig)
-xlabel('Sig-hat')
-ylabel('# of hits')
-
-subplot(3,1,3)
-hist(monteMu)
-xlabel('Mu-hat')
-ylabel('# of hits')
-
 %% Now calculate RI using results from Monte Carlo simulation 
-
+tic
 % First calculate cdf 
-x_axis = linspace((min(maxima(:))+ten_mean),(max(maxima(:))+ten_mean),100);
+x_axis = linspace((min(maxima(:))+ten_mean),4,1000); % Note, use a large number here to enhance accuracy of finding each year later on
 count = 1;
-cdf = zeros(length(x_axis),length(monteK)^3);
+cdf = zeros(length(x_axis),length(monteK));
+
 for ii = 1:length(monteK)
-    for jj = 1:length(monteSig)
-        for kk = 1:length(monteMu)
-            cdf(:,count) = 1 - gevcdf(x_axis,monteK(ii),monteSig(jj),monteMu(kk)+ten_mean);
-            count = count+1;
-        end
+    cdf(:,count) = 1 - gevcdf(x_axis,monteK(ii),monteSig(ii),monteMu(ii)+ten_mean);
+    count = count + 1;
+end
+toc
+
+% Calculate RI
+RI = 1./cdf;
+%% Get all the points where RI is the 1,2,3...100 year level
+
+% Create empty vector to populate
+inds = zeros(1,length(RI));
+
+yr_vec = 1:1:100;
+inds_mat = zeros(length(yr_vec),length(RI));
+tic
+% Find each location of the jth year water level
+for j = 1:length(RI)
+    % Grab one column of data
+    vals = RI(:,j);
+    for m = 1:length(yr_vec)
+        % Find the location of each yearly water level
+        temp_ind = findnearest(m,vals);
+        % Add it to the matrix 
+        inds_mat(m,j) = temp_ind(1);
     end
 end
 
-%% Calculate RI and plot
-clf
+wl_mat = x_axis(inds_mat);
+
+toc
+
+% Get the mean and standard deviation for each yearly water level
+mean_mat = mean(wl_mat,2);
+std_mat1 = std(wl_mat,0,2);
+
+%% Plot GEV estimates for RI with confidence intervals for recurrence
+% Base on standard deviation of 100 year levels
+x_axis = linspace((min(maxima(:))+ten_mean),4,length(std_mat));
+% Grab CDF based on GEV parameters
+cdf = 1 - gevcdf(x_axis,parmhat(1),parmhat(2),parmhat(3)+ten_mean);
+
+% Grab the estimate for recurrence interval
 RI = 1./cdf;
 
-line(x_axis, RI)
-xlim([3 4])
-ylim([0 100])
+plot(x_axis, RI)
+lower = line(x_axis - std_mat, RI, 'LineStyle', '--', 'Color', 'red');
+upper = line(x_axis + std_mat, RI, 'LineStyle', '--', 'Color', 'red');
+%mean_line = line(mean_mat, RI, 'Color', 'black');
 
-% Get all the points where RI is the 100 year level
+
+for k = 1:10:length(monteK)
+    temp_cdf = 1 - gevcdf(x_axis,monteK(k),monteSig(k),monteMu(k)+ten_mean);
+    temp_RI = 1./temp_cdf;
+    line(x_axis, temp_RI, 'Color', [.7 .7 .7])
+end
+ax = gca;
+ax.XLim = [3.2 4];
+ax.YLim = [0 100];
+xlabel('Maximum TWL [m]');
+ylabel('Recurrence Interval [years]');
+grid on
+hold on 
+
+ri_line = line(x_axis, RI, 'Color', 'blue', 'LineWidth', 2);
+lower = line(x_axis - std_mat, RI, 'LineStyle', '--', 'Color', 'red', 'LineWidth', 2);
+upper = line(x_axis + std_mat, RI, 'LineStyle', '--', 'Color', 'red', 'LineWidth', 2);
+%mean_line = line(mean_mat, RI, 'Color', 'black');
+
+
