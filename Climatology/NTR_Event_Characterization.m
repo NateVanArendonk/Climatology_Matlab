@@ -3,17 +3,24 @@ clearvars
 %first load in the data
 dir_nm = '../../COOPS_tides/';                                                    
 station_nm = 'seattle';
-load_file = strcat(dir_nm,station_nm,'/',station_nm,'_ntr');
+%load_file = strcat(dir_nm,station_nm,'/',station_nm,'_ntrHr');
+load_file = strcat(dir_nm,station_nm,'/',station_nm,'_ntr6min');
 load(load_file)
+clear dir_nm load_file
 %% Establish Search parameters 
 
 % Magnitude Parameters for NTR
-wl_thresh = 0;                                                              
-event_sep = 12;  % 6 hour window                                                            
+wl_thresh = 0.6096;
+% 0.1524
+% 0.3048
+% 0.4572
+% 0.6096
+event_sep = 12;  % 6 hour window = 12; 12 hour window = 24                                                           
 
 % Note -- NTR is in half hour increments
 %% Find all Extreme NTR events
 
+% Convert to real numbers
 ntr = real(ntr);
 
 % Find all events above the certain threshold
@@ -38,7 +45,7 @@ for jj = 1:length(breaks)
     end
 end
 
-% Change to vertical orientation 
+% Change to vertical orientation - personal preference, easier for viewing
 start = ntr_events(start)';
 stop = ntr_events(stop)';  
 bookends = [start,stop]; % Create a vector of beginning and ending events
@@ -97,8 +104,17 @@ for j = 1:length(duration)
     duration(j) = length(event_inds{j,1});
 end
 
-% Convert to units of hours 
+% Convert from half hourly to units of hours 
 duration = duration ./ 2;
+
+
+% Calculate Total Hour above Threshold
+total_hours = zeros(length(event_inds),1);
+for m = 1:length(total_hours)
+    total_hours(m) = length(event_inds{m,1});
+end
+total_hours = sum(total_hours);
+
 
 
 
@@ -121,40 +137,55 @@ for yr = 1:length(yr_vec)
     winter_inds(yr,1) = length(wi_inds);
     winter_inds(yr,2) = length(indices_by_year{yr,1});
 end
+% Calculate fraction of winter months
+% First get rid of any zeros
+
+winter_inds(any(winter_inds==0,2),:) = []; % get rid of any zeros
 
 
 frac_winter = winter_inds(:,1)./winter_inds(:,2);
 
+fprintf('\n%4.2f: Avg. Events per year\n', mean(events_per_year));
+fprintf('%4.2f: Max number of events on record\n', max(events_per_year));
+fprintf('%4.2f hours: Mean Duration\n', mean(duration));
+fprintf('%4.2f hour [%4.2f days]: Max Duration\n', max(duration), (max(duration)/24));
+fprintf('%4.2f: Percent during Oct - Apr\n', 100*(mean(frac_winter)));
+fprintf('%4.2f: Total Number of Winter Hours\n',sum(winter_inds(:,1))/length(yr_vec));
+
+
+
+
+
 %% Plot
 
-% Establish NTR threshold for plotting
-thresh1 = 0.1524; thresh2 = 0.3048; thresh3 = .6096; % meters
-%thresh1 = 0.5; thresh2 = 1.0; thresh3 = 1.5; % feet
-
-% Preallocate
-th_inds1 = zeros(length(event_inds),1);
-th_inds2 = th_inds1;
-th_inds3 = th_inds1;
-
-% Find all the events 
-for j = 1:length(event_inds)
-    temp1 = find(ntr(event_inds{j,1}) >= thresh1);
-    temp2 = find(ntr(event_inds{j,1}) >= thresh2);
-    temp3 = find(ntr(event_inds{j,1}) >= thresh3);
-    
-    th_inds1(j) = length(temp1);
-    th_inds2(j) = length(temp2);
-    th_inds3(j) = length(temp3);
-end
-
-del1 = find(th_inds1 == 0);
-del2 = find(th_inds2 ==0);
-del3 = find(th_inds3 == 0);
-
-th_inds1(del1) = [];
-th_inds2(del2) = [];
-th_inds3(del3) = [];
-
-clear temp1 temp2 temp3 j n 
-
-        
+% % % % Establish NTR threshold for plotting
+% % % thresh1 = 0.1524; thresh2 = 0.3048; thresh3 = .6096; % meters
+% % % %thresh1 = 0.5; thresh2 = 1.0; thresh3 = 1.5; % feet
+% % % 
+% % % % Preallocate
+% % % th_inds1 = zeros(length(event_inds),1);
+% % % th_inds2 = th_inds1;
+% % % th_inds3 = th_inds1;
+% % % 
+% % % % Find all the events 
+% % % for j = 1:length(event_inds)
+% % %     temp1 = find(ntr(event_inds{j,1}) >= thresh1);
+% % %     temp2 = find(ntr(event_inds{j,1}) >= thresh2);
+% % %     temp3 = find(ntr(event_inds{j,1}) >= thresh3);
+% % %     
+% % %     th_inds1(j) = length(temp1);
+% % %     th_inds2(j) = length(temp2);
+% % %     th_inds3(j) = length(temp3);
+% % % end
+% % % 
+% % % del1 = find(th_inds1 == 0);
+% % % del2 = find(th_inds2 ==0);
+% % % del3 = find(th_inds3 == 0);
+% % % 
+% % % th_inds1(del1) = [];
+% % % th_inds2(del2) = [];
+% % % th_inds3(del3) = [];
+% % % 
+% % % clear temp1 temp2 temp3 j n 
+% % % 
+% % %         

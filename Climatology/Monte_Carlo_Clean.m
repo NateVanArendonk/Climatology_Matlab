@@ -8,6 +8,7 @@ load_file = strcat(dir_nm,station_nm,'/',station_nm,'_hrV');
 load(load_file)
 clear dir_nm file_nm load_file
 %% Run Monte Carlo on GEV estimates for data and calculate Recurrence Interval
+
 % Years available
 yr = year(tides.time(1)):year(tides.time(end));
 
@@ -20,32 +21,50 @@ ten_mean = mean(tides.WL_VALUE(wl_inds));
 tides.WL_VALUE = detrend(tides.WL_VALUE);
 
 % rth values to collect (can vary)
-r_num = 10;
+block_num = 10;
+r_val = 3;
 
 % Min distance between events (half hour incr) 
 min_sep = 12;
 
 % Preallocate
-data = zeros(length(yr),r_num);
+data = zeros(length(yr),block_num);
 
 % Find rth number of max events per year
 for yy=1:length(yr)
     wl_inds = year(tides.time) == yr(yy);
     val_ind = tides.WL_VALUE(wl_inds);
-    for r=1:r_num
+    for r=1:block_num
         [data(yy,r), I] = max(val_ind);
         pop_inds = max([1 I-min_sep]):min([length(val_ind) I+min_sep]);
         val_ind(pop_inds) = [];
     end
 end
 
+%%
 % Grab GEV estimates
-[parmhat, parmCI] = gevfit(data(:,1));
+% - Block/Hybrid Method - must be a vector
+% data = data(:,1:r_val);
+% [parmhat, parmCI] = gevfit(data(:)); 
+
+% - Rth Largest, can be multi-column going Increasing to decreasing
+parmhat = gevfit_rth(data(:,1:r_val)); 
 
 % Calculate Standard Error for each parameter 
-kSE = (parmCI(1,1)-parmhat(1))/2;
-sigSE = (parmCI(1,2)-parmhat(2))/2;
-muSE = (parmCI(1,3)-parmhat(3))/2;
+% ---- Note ---- R gives Standard Error in terms of Location(mu),scale(sigma) and shape(k).  
+
+% From R - Standard Error Values for r of 3, Rth largest approximation 
+kSE = 0.027626061;
+sigSE = 0.003790572;
+muSE = 0.008569755;
+
+% For block maxima/hybrid approach.  Calculating SE from Matlabs Confidence
+% Intervals
+%kSE = (parmCI(1,1)-parmhat(1))/2;
+%sigSE = (parmCI(1,2)-parmhat(2))/2;
+%muSE = (parmCI(1,3)-parmhat(3))/2;
+
+%% Run Monte Carlo simulation 
 
 % Preallocate
 num_its = 10000;
@@ -53,7 +72,6 @@ k_hat = zeros(1,num_its);
 sig_hat = k_hat;
 mu_hat = k_hat;
 
-% Run Monte Carlo simulation 
 for jj = 1:num_its
     k_hat(1,jj) = parmhat(1) + (kSE * randn(1,1));
     sig_hat(1,jj) = parmhat(2) + (sigSE * randn(1,1));
@@ -91,7 +109,7 @@ for col = 1:length(RI_hat)
         indices(yr,col) = temp_ind(1);
     end
 end
-%%
+
 % Grab water levels for each indice 
 wl_mat = x_axis(indices);
 
@@ -122,7 +140,7 @@ clf
 plot(x_axis, RI)
 line(x_axis - std_mat, RI, 'LineStyle', '--', 'Color', 'red');
 line(x_axis + std_mat, RI, 'LineStyle', '--', 'Color', 'red');
-mean_line = line(mean_mat, RI, 'Color', 'black');
+%mean_line = line(mean_mat, RI, 'Color', 'black');
 
 
 for k = 1:100:num_its

@@ -99,7 +99,7 @@ end
 
 %%
 % Get GEV statistics about the data
-[parmhat] = gevfit_rth(maxima(:,1:r_val));
+[parmhat] = gevfit_rth(maxima(:,1:3));
 
 %maxima = maxima(:,1:r_val);
 %[parmhat, paramCIs] = gevfit(maxima(:));

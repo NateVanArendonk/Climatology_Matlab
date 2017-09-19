@@ -9,7 +9,8 @@ dir_nm = '../../COOPS_tides/';
 station_name = 'Seattle';
 station_nm = 'seattle';
 
-load_file = strcat(dir_nm,station_nm,'/',station_nm,'_hrV');
+%load_file = strcat(dir_nm,station_nm,'/',station_nm,'_hrV');
+load_file = strcat(dir_nm,station_nm,'/',station_nm,'_6minV');
 load(load_file)
 %%  Create half hourly time vec and interp data onto 
 
@@ -29,14 +30,16 @@ tides_half = interpShortGap(tides.time(II),tides.WL_VALUE(II),tvec, 6);
 
 ntr.ntr = filter_tides(tides_half);
 ntr.time = tvec;
+% Convert from complex to real numbers
+ntr.ntr = real(ntr.ntr);
 %% Save data
 
-save_loc = sprintf(strcat(dir_nm,station_nm,'/'));
 
-cd(save_loc)
 
-save_nm = sprintf(strcat(station_nm, '_ntr'));
+cd('../../')
+
+save_nm = sprintf(strcat(station_nm, '_ntr6min'));
 
 save(save_nm, '-struct', 'ntr')
 
-cd('../../matlab/Climatology')
+cd('matlab/Climatology')
