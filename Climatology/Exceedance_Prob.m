@@ -196,7 +196,7 @@ t2.FontSize = 14;
 % Save the Plot
 cd('../../')
 
-outname = sprintf('Prob_exceed_change_Rth_BLANK%s',station_nm);
+outname = sprintf('Prob_exceed_change_Rth%s',station_nm);
 hFig = gcf;
 hFig.PaperUnits = 'inches';
 hFig.PaperSize = [8.5 11];

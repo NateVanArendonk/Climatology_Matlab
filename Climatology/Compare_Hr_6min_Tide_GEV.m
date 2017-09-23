@@ -29,8 +29,15 @@ yr_vechr = year(thr.time(1)):year(thr.time(end));
 
 %create matrix to house all of the block maxima
 maxhr = zeros(length(yr_vechr), r_val); 
+
+% Find mean of last 10 years 
+tinds = find(year(thr.time) == yr_vechr(end) - 10);
+inds = tinds(1):length(thr.WL_VALUE);
+ten_meanhr = mean(thr.WL_VALUE(inds));
+
 %Detrend water
 thr.WL_VALUE = detrend(thr.WL_VALUE);
+
 
 for y = 1:length(yr_vechr)
     % Grab all of the years
@@ -81,6 +88,12 @@ yr_vec6 = year(t6.time(1)):year(t6.time(end));
 
 %create matrix to house all of the block maxima
 max6 = zeros(length(yr_vec6), r_val); 
+
+% Find mean of last 10 years 
+tinds = find(year(t6.time) == yr_vec6(end) - 10);
+inds = tinds(1):length(t6.WL_VALUE);
+ten_mean6 = mean(t6.WL_VALUE(inds));
+
 %Detrend water
 t6.WL_VALUE = detrend(t6.WL_VALUE);
 
@@ -126,25 +139,29 @@ end
 
 %% Get GEV statistics from the data
 % Reshape to be a single vector
-maxhr = reshape(maxhr, [length(yr_vechr)*r_val, 1]);
-max6 = reshape(max6, [length(yr_vec6)*r_val, 1]);
+%maxhr = reshape(maxhr, [length(yr_vechr)*r_val, 1]);
+%max6 = reshape(max6, [length(yr_vec6)*r_val, 1]);
+% [paramEstshr, paramCIhr] = gevfit_rth(maxhr);
+% [paramEsts6, paramCI6] = gevfit_rth(max6);
 
-[paramEstshr, paramCIhr] = gevfit(maxhr);
-[paramEsts6, paramCI6] = gevfit(max6);
+parmhatHR = gevfit_rth(maxhr);
+parmhat6 = gevfit_rth(max6);
+
 %----------------Results from GEV-------------------------------
 % % % kMLE = paramEsts(1);        % Shape parameter
 % % % sigmaMLE = paramEsts(2);    % Scale parameter
 % % % muMLE = paramEsts(3);       % Location parameter
 
+%%
 
 
 clf
 
 lowerBnd = 0;
-xhr = maxhr;
-x6 = max6;
-xmaxhr = 1.1*max(xhr);
-xmax6 = 1.1*max(x6);
+xhr = maxhr(:); xhr = xhr + ten_meanhr;
+x6 = max6(:); x6 = x6 + ten_mean6;
+xmaxhr = (1.1*max(xhr));
+xmax6 = (1.1*max(x6));
 binshr = floor(lowerBnd):.1:ceil(xmaxhr);
 bins6 = floor(lowerBnd):.1:ceil(xmax6);
 
@@ -157,9 +174,9 @@ h2 = bar(bins6,histc(x6,bins6)/length(x6),'histc');
 h2.FaceColor = [.8 .8 1];
 xgridhr = linspace(lowerBnd,xmaxhr,100);
 xgrid6 = linspace(lowerBnd,xmax6,100);
-lhr = line(xgridhr,.1*gevpdf(xgridhr,paramEstshr(1),paramEstshr(2),paramEstshr(3)));
+lhr = line(xgridhr,.1*gevpdf(xgridhr,parmhatHR(1),parmhatHR(2),parmhatHR(3)+ten_meanhr));
 lhr.Color = 'red';
-l6 = line(xgrid6,.1*gevpdf(xgrid6,paramEsts6(1),paramEsts6(2),paramEsts6(3)));
+l6 = line(xgrid6,.1*gevpdf(xgrid6,parmhat6(1),parmhat6(2),parmhat6(3)+ten_mean6));
 l6.Color = 'blue';
 %xlim([0 xmaxhr]);
 plot_tit = sprintf('GEV - Rth Largest - %s', station_name);
@@ -167,22 +184,22 @@ title(plot_tit)
 legend 
 
 ax = gca;  % Play with the Axes 
-ax.XLim = [.5 xmaxhr*1.1];
+ax.XLim = [2.95 xmaxhr*1.1];
 
 
 % % % Add GEV parameters to the plot
 tbox1 = sprintf('\t\t\t\t\t\t Hourly\n mu = %4.2f \nsigma = %4.2f \nk = %4.2f \nr: %d',...
-    paramEstshr(1),paramEstshr(2),paramEstshr(3), r_val);
+    parmhatHR(1),parmhatHR(2),parmhatHR(3), r_val);
 text(10,0.25,tbox1)
 
 tbox2 = sprintf('\t\t\t\t\t\t 6 min\nmu = %4.2f \nsigma = %4.2f \nk = %4.2f \nr: %d',...
-    paramEsts6(1),paramEsts6(2),paramEsts6(3), r_val);
+    parmhat6(1),parmhat6(2),parmhat6(3), r_val);
 text(10,0.25,tbox2)
 
 % Add box around the text
-dim1 = [.15 .6 .1 .1];
+dim1 = [.29 .6 .1 .1];
 annotation('textbox',dim1,'String',tbox1,'FitBoxToText','on');
-dim2 = [.15 .4 .1 .1];
+dim2 = [.29 .4 .1 .1];
 annotation('textbox',dim2,'String',tbox2,'FitBoxToText','on');
 
 
@@ -194,12 +211,12 @@ ylabel('Probability Density')
 box on
 
 lg1 = legend([lhr l6 h1 h2],'Hourly', '6 min', 'Hourly', '6 min');
-lg1.Position = [.2 .83 .05 .05];
+lg1.Position = [.35 .83 .05 .05];
 
 
 % Calculate the CDF - CDF will give me the probability of values 
-cdfhr = 1 - gevcdf(xgridhr,paramEstshr(1),paramEstshr(2),paramEstshr(3)); % create CDF from GEV PDF
-cdf6 = 1 - gevcdf(xgrid6,paramEsts6(1),paramEsts6(2),paramEsts6(3)); % create CDF from GEV PDF        
+cdfhr = 1 - gevcdf(xgridhr,parmhatHR(1),parmhatHR(2),parmhatHR(3)+ten_meanhr); % create CDF from GEV PDF
+cdf6 = 1 - gevcdf(xgrid6,parmhat6(1),parmhat6(2),parmhat6(3)+ten_mean6); % create CDF from GEV PDF        
         
 %% Calculate Recurrence Interval
 
@@ -222,7 +239,7 @@ ylabel('Time [years]')
 
 ax = gca;
 set(gca,'XMinorTick','on')  %add minor tick marks on x-axis
-ax.XLim = [1 2.5];
+ax.XLim = [3 3.8];
 box on 
 grid on
 
@@ -230,29 +247,29 @@ grid on
 % Generate specific values for recurrence levels
 
 % Hourly Data
-R100MLEhr = gevinv(1-1./100,paramEstshr(1),paramEstshr(2),paramEstshr(3));
-R50MLEhr = gevinv(1-1./50,paramEstshr(1),paramEstshr(2),paramEstshr(3));
-R25MLEhr = gevinv(1-1./25,paramEstshr(1),paramEstshr(2),paramEstshr(3));
-R10MLEhr = gevinv(1-1./10,paramEstshr(1),paramEstshr(2),paramEstshr(3));
-R5MLEhr = gevinv(1-1./5,paramEstshr(1),paramEstshr(2),paramEstshr(3));
-R2MLEhr = gevinv(1-1./2,paramEstshr(1),paramEstshr(2),paramEstshr(3));
+R100MLEhr = gevinv(1-1./100,parmhatHR(1),parmhatHR(2),parmhatHR(3)+ten_meanhr);
+R50MLEhr = gevinv(1-1./50,parmhatHR(1),parmhatHR(2),parmhatHR(3)+ten_meanhr);
+R25MLEhr = gevinv(1-1./25,parmhatHR(1),parmhatHR(2),parmhatHR(3)+ten_meanhr);
+R10MLEhr = gevinv(1-1./10,parmhatHR(1),parmhatHR(2),parmhatHR(3)+ten_meanhr);
+R5MLEhr = gevinv(1-1./5,parmhatHR(1),parmhatHR(2),parmhatHR(3)+ten_meanhr);
+R2MLEhr = gevinv(1-1./2,parmhatHR(1),parmhatHR(2),parmhatHR(3)+ten_meanhr);
 
 % Add GEV parameters to the plot
-tbox = sprintf('100 yr: %4.2f m\n50 yr: %4.2f m\n25 yr: %4.2f m\n10 yr: %4.2f m\n5 yr: %4.2f m\n2 yr: %4.2f m'...
+tbox = sprintf('\t\t\t\t\t\t\t\tHourly\n100 yr: %4.2f m\n50 yr: %4.2f m\n25 yr: %4.2f m\n10 yr: %4.2f m\n5 yr: %4.2f m\n2 yr: %4.2f m'...
     ,R100MLEhr, R50MLEhr, R25MLEhr, R10MLEhr, R5MLEhr, R2MLEhr);
 dim = [.62 .4 .3 .3];
 annotation('textbox',dim,'String',tbox,'FitBoxToText','on');
 
 % Six minute data
-R100MLE6 = gevinv(1-1./100,paramEsts6(1),paramEsts6(2),paramEsts6(3));
-R50MLE6 = gevinv(1-1./50,paramEsts6(1),paramEsts6(2),paramEsts6(3));
-R25MLE6 = gevinv(1-1./25,paramEsts6(1),paramEsts6(2),paramEsts6(3));
-R10MLE6 = gevinv(1-1./10,paramEsts6(1),paramEsts6(2),paramEsts6(3));
-R5MLE6 = gevinv(1-1./5,paramEsts6(1),paramEsts6(2),paramEsts6(3));
-R2MLE6 = gevinv(1-1./2,paramEsts6(1),paramEsts6(2),paramEsts6(3));
+R100MLE6 = gevinv(1-1./100,parmhat6(1),parmhat6(2),parmhat6(3)+ten_mean6);
+R50MLE6 = gevinv(1-1./50,parmhat6(1),parmhat6(2),parmhat6(3)+ten_mean6);
+R25MLE6 = gevinv(1-1./25,parmhat6(1),parmhat6(2),parmhat6(3)+ten_mean6);
+R10MLE6 = gevinv(1-1./10,parmhat6(1),parmhat6(2),parmhat6(3)+ten_mean6);
+R5MLE6 = gevinv(1-1./5,parmhat6(1),parmhat6(2),parmhat6(3)+ten_mean6);
+R2MLE6 = gevinv(1-1./2,parmhat6(1),parmhat6(2),parmhat6(3)+ten_mean6);
 
 % Add GEV parameters to the plot
-tbox = sprintf('100 yr: %4.2f m\n50 yr: %4.2f m\n25 yr: %4.2f m\n10 yr: %4.2f m\n5 yr: %4.2f m\n2 yr: %4.2f m'...
+tbox = sprintf('\t\t\t\t\t\t6 minute\n100 yr: %4.2f m\n50 yr: %4.2f m\n25 yr: %4.2f m\n10 yr: %4.2f m\n5 yr: %4.2f m\n2 yr: %4.2f m'...
     ,R100MLE6, R50MLE6, R25MLE6, R10MLE6, R5MLE6, R2MLE6);
 dim = [.62 .1 .3 .3];
 annotation('textbox',dim,'String',tbox,'FitBoxToText','on');

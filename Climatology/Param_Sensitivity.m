@@ -53,28 +53,73 @@ data_datum = maxima + ten_mean;
 % limits
 xlim = [(min(maxima(:))+ten_mean) (1.1*max(maxima(:))+ten_mean)];
 
+% Plot histogram of maximum data 
 clf
 figure(1)
 subplot(2,2,1)
-pdf_data = histogram(maxima(:,1)+ten_mean,8,'Normalization','pdf');
+pdf_data = histogram(maxima(:,1:3)+ten_mean,8,'Normalization','pdf');
 hold on
 
 mycolors = jet(10);
+
 % Get GEV parameters from distribution
-[parmhat parmCI] = gevfit(maxima(:,1));
+parmhat = gevfit_rth(maxima(:,1:3)); % for r = 3
+
+% Seattle SE estimates from R for r = 1:10 respectively 
+parmCI1k = 0.052853561; parmCI1sig = 0.008332192; parmCI1mu = 0.012107234;
+parmCI2k = 0.035790486; parmCI2sig = 0.005087182; parmCI2mu = 0.009950179;
+parmCI3k = 0.027626061; parmCI3sig = 0.003790572; parmCI3mu = 0.008569755;
+parmCI4k = 0.024745905; parmCI4sig = 0.003361619; parmCI4mu = 0.008046526; 
+parmCI5k = 0.022052276; parmCI5sig = 0.003066568; parmCI5mu = 0.007655433;
+parmCI6k = 0.021402956; parmCI6sig = 0.003030071; parmCI6mu = 0.007282214;
+parmCI7k = 0.019711360; parmCI7sig = 0.002892105; parmCI7mu = 0.006997288;
+parmCI8k = 0.019039934; parmCI8sig = 0.002866830; parmCI8mu = 0.006825072;
+parmCI9k = 0.018517831; parmCI9sig = 0.002872376; parmCI9mu = 0.006666725;
+parmCI10k = 0.017841100; parmCI10sig = 0.002857912; parmCI10mu = 0.006529347;
+
 % Set up x axis
 x_axis = linspace(xlim(1),xlim(2),100);
-% Set up line of gev fit to data
-pdf_gev = gevpdf(x_axis,parmhat(1),parmhat(2),parmhat(3)+ten_mean);
-% Plot the line on the PDF
-plot(x_axis,pdf_gev,'Color',mycolors(1,:));
 
-ylabel('Probability')
+% Set up line of gev fit to data
+parmhat = gevfit_rth(maxima(:,1)); % for r = 3
+pdf_gev1 = gevpdf(x_axis,parmhat(1),parmhat(2),parmhat(3)+ten_mean);
+
+% Plot the line on the PDF
+plot(x_axis,pdf_gev1,'Color',mycolors(1,:));
+hold on 
+
+% plot a line with r = 3
+parmhat = gevfit_rth(maxima(:,1:3)); % for r = 3 'block maxima' 1 value estimate
+pdf_gev3 = gevpdf(x_axis,parmhat(1),parmhat(2),parmhat(3)+ten_mean);
+plot(x_axis,pdf_gev3,'Color',mycolors(3,:));
+hold on 
+
+% plot a line with r = 5
+parmhat = gevfit_rth(maxima(:,1:5)); % for r = 5 1 value estimate
+pdf_gev5 = gevpdf(x_axis,parmhat(1),parmhat(2),parmhat(3)+ten_mean);
+plot(x_axis,pdf_gev5,'Color',mycolors(5,:));
+hold on 
+
+% plot a line with r = 10
+parmhat = gevfit_rth(maxima(:,1:10)); % for r = 10 value estimate
+pdf_gev10 = gevpdf(x_axis,parmhat(1),parmhat(2),parmhat(3)+ten_mean);
+plot(x_axis,pdf_gev10,'Color',mycolors(10,:));
+
+% Add labels and establish limits
+ylabel('Probability Distribution')
 xlabel('Maximum yearly TWL [m]')
-plot_tit = sprintf('%s - GEV Fit',station_name);
+plot_tit = sprintf('%s - GEV Fit [rth largest]',station_name);
 title(plot_tit)
 ax = gca;
 ax.XLim = [xlim(1) xlim(2)-.2];
+legend('r=3','r=1','r=3','r=5','r=10','Location','northwest');
+
+
+% go back to r = 3 for rth largest gev_estimates for plots below 
+parmhat = gevfit_rth(maxima(:,1:3));
+
+
+
 
 %% Change parameters using confidence intervals (95% CI from Matlab)
 
@@ -86,15 +131,14 @@ ax.XLim = [xlim(1) xlim(2)-.2];
 
 % First play around with k - paramhat(1)
 subplot(2,2,2)
-pdf_data = histogram(maxima(:,1)+ten_mean,8,'Normalization','pdf');
+pdf_data = histogram(maxima(:,1:3)+ten_mean,8,'Normalization','pdf');
 hold on
 % limits
 ax = gca;
 ax.XLim = [xlim(1) xlim(2)-.2];
 
-kvec = linspace(parmCI(1,1),parmCI(2,1),10);
-
-
+kvec = linspace(parmhat(1) - parmCI1k, parmhat(1) + parmCI1k,10);
+%kvec = linspace(parmCI(1,1),parmCI(2,1),10);
 
 for k = 1:length(kvec)
 % GEV pdf 
@@ -111,21 +155,22 @@ kinc = diff(kvec);
 chan.YTick = .05:.1:.95;
 chan.YTickLabel = kvec;
 ylabel(chan,'k-value')
-ylabel('Probability')
+ylabel('Probability Distribution')
 xlabel('Maximum yearly TWL [m]')
 plot_tit = sprintf('%s - Varying K',station_name);
 title(plot_tit)
-
+%legend('r=3','Location','northwest')
 %% Now for sigmahat - paramhat(2)
 subplot(2,2,3)
-pdf_data = histogram(maxima(:,1)+ten_mean,8,'Normalization','pdf');
+pdf_data = histogram(maxima(:,1:3)+ten_mean,8,'Normalization','pdf');
 hold on
 % limits
 ax = gca;
 ax.XLim = [xlim(1) xlim(2)-.2];
 
 % Create vector for sigma
-sigvec = linspace(parmCI(1,2),parmCI(2,2),10);
+sigvec = linspace(parmhat(2) - parmCI1sig, parmhat(2) + parmCI1sig,10);
+%sigvec = linspace(parmCI(1,2),parmCI(2,2),10);
 
 for s = 1:length(sigvec)
 % GEV pdf 
@@ -142,21 +187,23 @@ sinc = diff(sigvec);
 chan.YTick = .05:.1:.95;
 chan.YTickLabel = sigvec;
 ylabel(chan,'sigma-value')
-ylabel('Probability')
+ylabel('Probability Distribution')
 xlabel('Maximum yearly TWL [m]')
 plot_tit = sprintf('%s - Varying Sigma',station_name);
 title(plot_tit)
+%legend('r=3','Location','northwest')
 
 %% Now for muhat - paramhat(3)
 subplot(2,2,4)
-pdf_data = histogram(maxima(:,1)+ten_mean,8,'Normalization','pdf');
+pdf_data = histogram(maxima(:,1:3)+ten_mean,8,'Normalization','pdf');
 hold on
 % limits
 ax = gca;
 ax.XLim = [xlim(1) xlim(2)-.2];
 
 % Create vector for sigma
-muvec = linspace(parmCI(1,3),parmCI(2,3),10);
+muvec = linspace(parmhat(3) - parmCI1mu, parmhat(3) + parmCI1mu,10);
+%muvec = linspace(parmCI(1,3),parmCI(2,3),10);
 
 for m = 1:length(muvec)
 % GEV pdf 
@@ -173,10 +220,25 @@ minc = diff(muvec);
 chan.YTick = .05:.1:.95;
 chan.YTickLabel = muvec;
 ylabel(chan,'mu-value')
-ylabel('Probability')
+ylabel('Probability Distribution')
 xlabel('Maximum yearly TWL [m]')
 plot_tit = sprintf('%s - Varying Mu',station_name);
 title(plot_tit)
+%legend('r=3','Location','northwest')
+
+%% Save Plot 
+
+cd('../../');
+outname = sprintf('Rvalue_sensitivity_%s',station_nm);
+hFig = gcf;
+hFig.PaperUnits = 'inches';
+hFig.PaperSize = [8.5 11];
+hFig.PaperPosition = [0 0 7 7];
+print(hFig,'-dpng','-r350',outname) %saves the figure, (figure, filetype, resolution, file name)
+close(hFig)
+
+%cd('../../../matlab/Climatology')
+cd('matlab/Climatology')
 
 
 %% Plot CDF
@@ -196,10 +258,35 @@ grid on
 ax = gca;
 ax.XLim = [3 4];
 legend('Observations','GEV')
+
 %set(gca,'YScale','log')
+
+%% Save Plot 
+cd('../../');
+outname = sprintf('CDF_Fit_%s',station_nm);
+hFig = gcf;
+hFig.PaperUnits = 'inches';
+hFig.PaperSize = [8.5 11];
+hFig.PaperPosition = [0 0 7 7];
+print(hFig,'-dpng','-r350',outname) %saves the figure, (figure, filetype, resolution, file name)
+close(hFig)
+
+%cd('../../../matlab/Climatology')
+cd('matlab/Climatology')
+
 
 
 %%  Vary Parameters and Plot CI
+
+
+
+
+
+
+% ---- USE MONTE CARLO SCRIPT FOR THIS ---- %
+
+
+
 
 % Create cdf's for all rth values
 for rth_num = 1:10
@@ -211,15 +298,21 @@ end
 
 % Create cdf's for varying block estimates using CI
 res = 10;
-k_var = linspace(parmCI(1,1),parmCI(2,1),res);
-sig_var = linspace(parmCI(1,2),parmCI(2,2),res);
-mu_var = linspace(parmCI(1,3),parmCI(2,3),res);
+
+k_var = kvec;
+sig_var = sigvec;
+mu_var = muvec;
+% k_var = linspace(parmCI(1,1),parmCI(2,1),res);
+% sig_var = linspace(parmCI(1,2),parmCI(2,2),res);
+% mu_var = linspace(parmCI(1,3),parmCI(2,3),res);
+
+
 count = 1;
 cdf_gev_MC = zeros(length(x_axis),res^3);
 for ii = 1:length(k_var)
     for jj = 1:length(sig_var)
         for kk = 1:length(mu_var)
-            parmhat = gevfit(maxima(:,1));
+            parmhat = gevfit_rth(maxima(:,1));
             cdf_gev_MC(:,count) = gevcdf(x_axis,k_var(ii),sig_var(jj),mu_var(kk)+ten_mean);
             count = count+1;
         end
@@ -248,9 +341,9 @@ title(plot_tit)
 
 % Create vectors using 95% confidence intervals
 its = 10;
-k_var = linspace(parmCI(1,1),parmCI(2,1),its);
-sig_var = linspace(parmCI(1,2),parmCI(2,2),its);
-mu_var = linspace(parmCI(1,3),parmCI(2,3),its);
+%k_var = linspace(parmCI(1,1),parmCI(2,1),its);
+%sig_var = linspace(parmCI(1,2),parmCI(2,2),its);
+%mu_var = linspace(parmCI(1,3),parmCI(2,3),its);
 cdf_gev_vk = zeros(length(x_axis),its); % varying K cdf
 cdf_gev_vs = zeros(length(x_axis),its); % varying sig cdf
 cdf_gev_vm = zeros(length(x_axis),its); % varying mu cdf

@@ -10,7 +10,7 @@ clear dir_nm load_file
 %% Establish Search parameters 
 
 % Magnitude Parameters for NTR
-wl_thresh = 0.6096;
+wl_thresh = 0;
 % 0.1524
 % 0.3048
 % 0.4572
@@ -18,10 +18,20 @@ wl_thresh = 0.6096;
 event_sep = 12;  % 6 hour window = 12; 12 hour window = 24                                                           
 
 % Note -- NTR is in half hour increments
-%% Find all Extreme NTR events
+
+% Find all Extreme NTR events
 
 % Convert to real numbers
 ntr = real(ntr);
+
+% Get rid of questionable levels
+% % inds_del1 = find(ntr >= 1);
+% % ntr(inds_del1) = [];
+% % time(inds_del1) = [];
+% % 
+% % inds_del2 = find(ntr<=-1);
+% % ntr(inds_del2) = [];
+% % time(inds_del2) = [];
 
 % Find all events above the certain threshold
 ntr_events = find(ntr >= wl_thresh);                                         
@@ -150,7 +160,7 @@ fprintf('%4.2f: Max number of events on record\n', max(events_per_year));
 fprintf('%4.2f hours: Mean Duration\n', mean(duration));
 fprintf('%4.2f hour [%4.2f days]: Max Duration\n', max(duration), (max(duration)/24));
 fprintf('%4.2f: Percent during Oct - Apr\n', 100*(mean(frac_winter)));
-fprintf('%4.2f: Total Number of Winter Hours\n',sum(winter_inds(:,1))/length(yr_vec));
+fprintf('%4.2f: Total Number of Winter Hours\n',(sum(winter_inds(:,1))/length(yr_vec))/2);
 
 
 

@@ -105,6 +105,28 @@ fprintf('\n')
 fprintf('Wind Speed Max: %4.2f m/s \n',(spd_max))
 %fprintf('Wind Speed Min: %4.2f m/s \n',(spd_min))
 fprintf('Slp Min: %4.2f mbars \n',(slp_min))
-
 fprintf('%4.2f years on record', (record))
 
+yr_vec = year(time(1)):year(time(end));
+yrs = length(yr_vec);
+
+inds_above10 = find(wndspd >= 10);
+inds_above15 = find(wndspd >= 15);
+inds_above20 = find(wndspd >= 20);
+inds_above25 = find(wndspd >= 25);
+
+fprintf('\n\n%4.2f hours above 10 m/s', length(inds_above10)/yrs)
+fprintf('\n%4.2f hours above 15 m/s', length(inds_above15)/yrs) 
+fprintf('\n%4.2f hours above 20 m/s', length(inds_above20)/yrs) 
+fprintf('\n%4.2f hours above 25 m/s', length(inds_above25)/yrs) 
+
+
+inds_below1000 = find(slp <= 1000);
+inds_below990 = find(slp <= 990);
+inds_below980 = find(slp <= 980);
+inds_below970 = find(slp <= 970);
+
+fprintf('\n\n%4.2f hours below 1000 mbs', length(inds_below1000)/yrs)
+fprintf('\n%4.2f hours below 990 mbs', length(inds_below990)/yrs) 
+fprintf('\n%4.2f hours below 980 mbs', length(inds_below980)/yrs) 
+fprintf('\n%4.2f hours below 970 mbs', length(inds_below970)/yrs) 
