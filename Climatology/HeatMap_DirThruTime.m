@@ -6,7 +6,9 @@ load_file = strcat(dir_nm,file_nm, '_hourly');
 load(load_file)
 clear dir_nm load_file
 
-%%
+%% Create Mesh Grid and populate with hits per year
+
+% variables for meshgrid
 y1 = year(time(1));
 y2 = year(time(end));
 x1 = 10;
@@ -61,8 +63,7 @@ end
 
 % Normalize the Data    
 Znorm = Z - min(Z(:));
-Znorm = Znorm ./ max(Znorm(:)); % 
-%Znorm = log(Znorm + .0001);
+Znorm = Znorm ./ max(Znorm(:)); 
 
 %% Add the mean on top as a line 
 
@@ -77,18 +78,21 @@ for j = 1:length(yr_vec)
     yr_inds = find(year(time) == yr_vec(j));
     temp_wnd = wnddir(yr_inds);
     % Find all the winds within the first window
-    l1 = find(temp_wnd >= 0 & temp_wnd <= 75);
+    l1 = find(temp_wnd >= 75 & temp_wnd <= 175);
     % Find all the winds within the second window
-    l2 = find(temp_wnd >= 175 & temp_wnd <= 250);
+    l2 = find(temp_wnd >= 225 & temp_wnd <= 325);
     % Calculate the mean
     wnddir_mean(j) = nanmean(wnddir(yr_inds));
     m1(j) = nanmean(temp_wnd(l1));
     m2(j) = nanmean(temp_wnd(l2));
 end
 
+%%
+
+
 figure
 %imagesc(10:10:360,yr1:1:yr2,log10(Z))
-imagesc(x1:x1:360,y1:1:y2, Zspd)
+imagesc(x1:x1:360,y1:1:y2, Z)
 set(gca,'YDir','normal') % set to normal Y scale
 colorbar
 ylabel('Year')
