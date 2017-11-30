@@ -1,15 +1,15 @@
-% clearvars
+clearvars
 
 % Load in the data
-% dir_nm = '../../hourly_data/gap_hourly/'; 
-% file_nm = 'whidbey_nas_hourly'; 
-% load_file = strcat(dir_nm,file_nm);
-% load(load_file)
-% clear dir_nm file_nm load_file
-
-% % If runnining multiple
+dir_nm = '../../hourly_data/gap_hourly/'; 
+file_nm = 'whidbey_nas_hourly'; 
 load_file = strcat(dir_nm,file_nm);
 load(load_file)
+clear dir_nm file_nm load_file
+
+% % If runnining multiple
+% load_file = strcat(dir_nm,file_nm);
+% load(load_file)
 
 
 wnddir = wnddir';
@@ -199,15 +199,15 @@ winter = [12, 1, 2];
 % season that the storm falls under
 
 for i = 1:length(event_inds)
-    cur_mo = month(time(storms{i,1}(1)));
+    cur_mo = month(time(event_inds{i,1}(1)));
     if ismember(cur_mo, spring)
-        storms{i,13} = 'Spring';
+        storm{i,13} = 'Spring';
     elseif ismember(cur_mo, summer)
-        storms{i,13} = 'Summer';
+        event_inds{i,13} = 'Summer';
     elseif ismember(cur_mo, fall)
-        storms{i,13} = 'Fall';
+        event_inds{i,13} = 'Fall';
     else
-        storms{i,13} = 'Winter';
+        event_inds{i,13} = 'Winter';
     end
 end
 
@@ -229,20 +229,20 @@ end
 % storm{i,12} to storm{i,13} to grab mode instead of mean.  
 
 for i = 1:length(event_inds)
-    if storms{i,11} >= 100 && storms{i,11} <= 260
-        storms{i,14} = 'South';
-    elseif storms{i,11} <= 80 || storms{i,11} >= 280
-        storms{i,14} = 'North';
-    elseif storms{i,11} > 80 && storms{i,11} < 100
-        storms{i,14} = 'East';
+    if event_inds{i,11} >= 100 && event_inds{i,11} <= 260
+        event_inds{i,14} = 'South';
+    elseif event_inds{i,11} <= 80 || event_inds{i,11} >= 280
+        event_inds{i,14} = 'North';
+    elseif event_inds{i,11} > 80 && event_inds{i,11} < 100
+        event_inds{i,14} = 'East';
     else
-        storms{i,14} = 'West';
+        event_inds{i,14} = 'West';
     end
 end
 
-%Add the year the event occured
+Add the year the event occured
 for i = 1:length(event_inds)
-    storms{i,15} = year(time(storms{i,1}(1)));
+    event_inds{i,15} = year(time(event_inds{i,1}(1)));
 end  
 
 
@@ -257,7 +257,7 @@ header = {'Indices' 'Duration', 'Max Speed', 'Min Speed'...
 blank = storms;                                                             % blank is the same data without header for use of adding data later on
 storms = [header; storms];    
 
-
+return
 %% Make a Color Map of duration vs speed
 
 %Grab and create the variables that I want

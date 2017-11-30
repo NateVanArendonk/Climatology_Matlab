@@ -1,11 +1,8 @@
 % Code to make a large structure of storms and generate heat maps 
 
-%% 
-% Code to iterate through the hourly data and run refinebyparameter and
-% plotdistribution codes
 clearvars
 
-dir_nm = '../../completed/';
+dir_nm = '../../hourly_data/gap_hourly/';
   % grabs all the files ending in .mat
 d = dir([dir_nm, '/*.mat']);
 
@@ -17,5 +14,5 @@ for n = 1:length(d)
     [pathstr, name, ext] = fileparts(file_nm);  % seperates file name and extension and such 
     station_nm = regexprep(name, '_hourly', ''); % Gets rid of '_hourly' from the name
     Storms
-    master.(station_nm) = storm;
+    master.(station_nm) = storms;
 end

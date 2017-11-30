@@ -1,6 +1,4 @@
 %% Rth largest GEV
-
-
 clearvars
 
 %first load in the data
@@ -12,7 +10,8 @@ station_nm = 'seattle';
 load_file = strcat(dir_nm,station_nm,'/',station_nm,'_hrV');
 load(load_file)
 clear dir_nm file_nm load_file
-%% Grab data
+%% Grab maxima of data
+
 % Years available
 yr = year(tides.time(1)):year(tides.time(end));
 
@@ -23,8 +22,6 @@ ten_mean = mean(tides.WL_VALUE(wl_inds));
 
 % Detrend tides
 tides.WL_VALUE = detrend(tides.WL_VALUE);
-% Convert to feet
-%tides.WL_VALUE = tides.WL_VALUE*3.28084;
 
 % rth values to collect (can vary)
 block_num = 10;
@@ -54,16 +51,20 @@ maxima_vec = data(:,1:r_val); maxima_vec = maxima_vec(:);
 [paramEstsblock, paramCIs] = gevfit(data(:,1));
 [paramEstsvit, paramCIs] = gevfit(maxima_vec);
 [paramEstsrth] = gevfit_rth(data(:,1:r_val));
+
 %----------------Results from GEV-------------------------------
 % % % kMLE = paramEsts(1);        % Shape parameter
 % % % sigmaMLE = paramEsts(2);    % Scale parameter
 % % % muMLE = paramEsts(3);       % Location parameter
-%% Preliminary Plotting Data
+
+%% Plot Histogram of data with GEV fit 
+
+% Parameters for plotting hist
 lowerBnd = 2.5;
 x = maxima_vec;
 xmax = 1.1*max(x)+ten_mean;
 bins = lowerBnd:.1:ceil(xmax); 
-%% Plot the Data
+
 % Plot histograms for the data 
 clf
 figure(1)
@@ -72,11 +73,10 @@ h1 = bar(bins,histc(x+ten_mean,bins)/length(x),'histc');
 h1.FaceColor = [.8 .8 .8];
 
 hold on
-% Plot block data distribution
+% Plot rth_block data distribution
 h2 = bar(bins,histc(data(:,1)+ten_mean,bins)/length(data),'histc');
 h2.FaceColor = [.8 .8 1];
 set(h2,'FaceAlpha',.3);
-
 
 % Add the Line for the estimates of the GEV Fit
 xgrid = linspace(lowerBnd,xmax,100);
@@ -98,18 +98,19 @@ title(plot_tit)
 ax = gca;   
 ax.XLim = [2.8 4];
 
-
-% % % % % Add GEV parameters to the plot % % % % % %
+% Add GEV parameters to the plot 
 % Block data
 tbox = sprintf('\t\t\t\t\t\tBlock\nmu = %4.2f \nsigma = %4.2f \nk = %4.2f \nr: %d',...
     paramEstsblock(1),paramEstsblock(2),paramEstsblock(3), 1);
 dim = [.18 .6 .3 .3];
 annotation('textbox',dim,'String',tbox,'FitBoxToText','on');
+
 % Rth Largest
 tbox2 = sprintf('\t\t\t\t\t\tRth\nmu = %4.2f \nsigma = %4.2f \nk = %4.2f \nr: %d',...
     paramEstsrth(1),paramEstsrth(2),paramEstsrth(3), r_val);
 dim = [.18 .4 .3 .3];
 annotation('textbox',dim,'String',tbox2,'FitBoxToText','on');
+
 % Vitousik/Hybrid
 tbox3 = sprintf('\t\t\t\t\t\tHybrid\nmu = %4.2f \nsigma = %4.2f \nk = %4.2f \nr: %d',...
     paramEstsvit(1),paramEstsvit(2),paramEstsvit(3), r_val);
@@ -120,9 +121,8 @@ annotation('textbox',dim,'String',tbox3,'FitBoxToText','on');
 xlabel('Total Water Level [m]')
 ylabel('Probability Distribution')
 box on
-
-
 %% Save the plot 
+
 cd('../../');
 outname = sprintf('GEV_compareMethods_%s',station_nm);
 hFig = gcf;
@@ -132,23 +132,22 @@ hFig.PaperPosition = [0 0 7 7];
 print(hFig,'-dpng','-r350',outname) %saves the figure, (figure, filetype, resolution, file name)
 close(hFig)
 
-%cd('../../../matlab/Climatology')
 cd('matlab/Climatology')
 
 %% Calculate Recurrence Interval
 
+% Calculate CDF 
+cdfblock = 1 - gevcdf(xgrid,paramEstsblock(1),paramEstsblock(2),paramEstsblock(3)+ten_mean); 
+cdfrth = 1 - gevcdf(xgrid,paramEstsrth(1),paramEstsrth(2),paramEstsrth(3)+ten_mean);     
+cdfvit = 1 - gevcdf(xgrid,paramEstsvit(1),paramEstsvit(2),paramEstsvit(3)+ten_mean);  
 
-cdfblock = 1 - gevcdf(xgrid,paramEstsblock(1),paramEstsblock(2),paramEstsblock(3)+ten_mean); % create CDF from GEV PDF
-cdfrth = 1 - gevcdf(xgrid,paramEstsrth(1),paramEstsrth(2),paramEstsrth(3)+ten_mean); % create CDF from GEV PDF      
-cdfvit = 1 - gevcdf(xgrid,paramEstsvit(1),paramEstsvit(2),paramEstsvit(3)+ten_mean); % create CDF from GEV PDF  
-%-------Note-----------%
-%RI = 1/Probability
-%Knowing CDF and thus the probability, I can calculate the Recurrence
-figure(2)
+% Calculate Recurrence Intervals 
 RIblock = 1./cdfblock;
 RIrth = 1./cdfrth;
 RIvit = 1./cdfvit;
-%subplot(2,2,[2 4])
+
+% Plot Recurrence Intervals 
+figure(2)
 rcb = line(xgrid, RIblock);
 rcb.Color = 'red';
 rcr = line(xgrid, RIrth);
@@ -156,10 +155,10 @@ rcr.Color = 'blue';
 rcv = line(xgrid, RIvit);
 rcv.Color = 'green';
 
-
-
+% Limits of data
 ylim([0 100])
 xlim([3.1 4.0])
+
 % Add Labels
 plot_tit = sprintf('Recurrence Interval Comparison - %s', station_name);
 title(plot_tit)
@@ -170,10 +169,10 @@ ylabel('Time [years]')
 ax = gca;
 set(gca,'XMinorTick','on') 
 
+% Add legend and grid to plot 
 box on 
 grid on
 legend([rcb,rcr,rcv],'Block','Rth','Hybrid')
-
 
 % Generate RI Estimates
 % Block
