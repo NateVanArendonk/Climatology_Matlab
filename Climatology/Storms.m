@@ -126,8 +126,12 @@ for i = 1:length(event_inds)
     storms{i,6} = var(wndspd(event_inds{i,1}));                        
 end
 % Calculate the max pressure during storm
-for i = 1:length(event_inds)                    
-    storms{i,7} = max(slp(event_inds{i,1}));                          
+for i = 1:length(event_inds)  
+    if slp ~= 0
+        storms{i,7} = max(slp(event_inds{i,1}));
+    else
+        storms{i,8} = 9999.999;
+    end
 end
 
 % Calculate the min pressure during storm
