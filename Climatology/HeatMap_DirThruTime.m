@@ -5,14 +5,14 @@ file_nm = 'whidbey_nas';
 load_file = strcat(dir_nm,file_nm, '_hourly');
 load(load_file)
 clear dir_nm load_file
-
+return
 %% Create Mesh Grid and populate with hits per year
 
 % variables for meshgrid
 y1 = year(time(1));
 y2 = year(time(end));
 x1 = 10;
-xB = 5;
+xB = 10;
 xB1 = 10;  % Use this to see if binning is occuring
 xB2 = 20;  % Use this to plot coarser winds to show change thru time
 
@@ -78,9 +78,9 @@ for j = 1:length(yr_vec)
     yr_inds = find(year(time) == yr_vec(j));
     temp_wnd = wnddir(yr_inds);
     % Find all the winds within the first window
-    l1 = find(temp_wnd >= 75 & temp_wnd <= 175);
+    l1 = find(temp_wnd >= 75 & temp_wnd <= 200);
     % Find all the winds within the second window
-    l2 = find(temp_wnd >= 225 & temp_wnd <= 325);
+    l2 = find(temp_wnd >= 200& temp_wnd <= 360);
     % Calculate the mean
     wnddir_mean(j) = nanmean(wnddir(yr_inds));
     m1(j) = nanmean(temp_wnd(l1));
@@ -89,26 +89,31 @@ end
 
 %%
 
-
-figure
+clf
+%figure
 %imagesc(10:10:360,yr1:1:yr2,log10(Z))
-imagesc(x1:x1:360,y1:1:y2, Z)
+% imagesc(x1:x1:360,y1:1:y2, Z)
+pcolor(X,Y,Z/(365.25*24))
+shading interp
 set(gca,'YDir','normal') % set to normal Y scale
-colorbar
-ylabel('Year')
+c1 = colorbar;
+ylabel(c1,'Probability');
+
+ylabel('Time [yrs]')
 xlabel('Wind Direction [degrees]')
-title('Wind Direction Through Time')
-caxis([0,350])
+% title('Wind Direction Through Time')
+caxis([0,700/(365.25*24)])
+ylim([1965 2010])
 
 
 % Plot mean of wnddir on top of figure
 hold on
 %line(wnddir_mean, yr_vec, 'Color', 'black')
-line(m1, yr_vec, 'Color', 'black')
+line(m1, yr_vec, 'Color', 'black','LineWidth',4)
 hold on
-line(m2, yr_vec, 'Color', 'black')
+line(m2, yr_vec, 'Color', 'black','LineWidth',4)
 
-
+printFig(gcf,'Climatology2',[10 5],'png',300)
 
 
 

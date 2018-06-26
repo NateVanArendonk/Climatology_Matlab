@@ -64,10 +64,17 @@ if length(dates) == 1;
     file_name = strcat(usaf_str,dash,wban_str,dash,date_str,ftype);  %create file name
     st_yr = strcat(station_name,date_str);
     unzpd = mget(data_source,file_name,st_yr);  %get unzipped file and store it in newly created folder
+    copyfile('ncdc_parse_working.m',strcat(cur_dir,'/',folder_nm,'/',st_yr));
+    copyfile('ishJava.class',strcat(cur_dir,'/',folder_nm,'/',st_yr));
+    copyfile('ishJava.java',strcat(cur_dir,'/',folder_nm,'/',st_yr));
+    copyfile('csv_import.m',strcat(cur_dir,'/',folder_nm,'/',st_yr));
     cd(st_yr)
     gunzip('*.gz')
     close(data_source)
     delete(file_name);
+    
+    %file_use has same as file_name but without .gz
+    file_use = strcat(usaf_str,dash,wban_str,dash,date_str);
     
     %now parse the data
     file_out = strcat(folder_nm,under_sc,date_str,'.csv');

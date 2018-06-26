@@ -44,12 +44,12 @@ for x = 1:date_dif
     stn_yr = strcat(station_name,'_',date_str);
     %file_import = string(file_import);
     %run csv import 
-    if exist(file_import, 'file') == 2;   
+    if exist(file_import, 'file') == 2   
         temp_struct = csv_import(file_import);
         %bring in the temp structure
         assignin('base','temp_struct',temp_struct)
         counter = counter + 1;
-        for x = 2:length(temp_struct.USAF);
+        for x = 2:length(temp_struct.USAF)
             station_data.USAF(end+1) = temp_struct.USAF(x);
             station_data.WBAN(end+1) = temp_struct.WBAN(x);
             station_data.YR(end+1) = temp_struct.YR(x);
